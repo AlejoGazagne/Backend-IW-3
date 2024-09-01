@@ -22,21 +22,14 @@ public class BackendApplication implements CommandLineRunner{
 	
 	@Override
 	public void run(String... args) throws Exception {
-		
-
 		try {
-			Product p=new Product();
-			p.setProduct("Arroz");
-			p.setPrice(156.67);
-			productBusiness.add(p);
-			Product p1=productBusiness.load(p.getId());
-			Product p2=productBusiness.load(p.getProduct());
+			Product p = productBusiness.load(1);
+			p.setProduct("Leche");
+			p.setPrice(150);
+			Product p1 = productBusiness.update(p);
 			log.info(p1.toString());
-			log.info(p2.toString());
 		} catch (Exception e) {
 			log.warn(e.getMessage());
 		}
-		
 	}
-
 }

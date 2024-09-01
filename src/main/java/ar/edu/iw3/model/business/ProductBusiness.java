@@ -3,6 +3,7 @@ package ar.edu.iw3.model.business;
 import java.util.List;
 import java.util.Optional;
 
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +24,15 @@ public class ProductBusiness implements IProductBusiness {
 		Optional<Product> r;
 		
 		try {
-			r=productDAO.findById(id);
+			r = productDAO.findById(id);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
+			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
 		}
 		if(r.isEmpty())
-			throw NotFoundException.builder().message("No se encuentra el Producto id="+id).build();
+			throw NotFoundException.builder().message("No se encuentra el Producto id = " + id).build();
 		
 		return r.get();
-		
 		//return productDAO.findById(id).get();
 	}
 	
@@ -41,31 +41,30 @@ public class ProductBusiness implements IProductBusiness {
 		Optional<Product> r;
 		
 		try {
-			r=productDAO.findByProduct(product);
+			r = productDAO.findByProduct(product);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw BusinessException.builder().ex(e).build();
 		}
 		if(r.isEmpty())
-			throw NotFoundException.builder().message("No se encuentra el Producto denominado "+product).build();
+			throw NotFoundException.builder().message("No se encuentra el Producto denominado " + product).build();
 		
 		return r.get();
 	}
 
-	
 	@Override
 	public Product add(Product product) throws FoundException, BusinessException {
 		
 		try {
 			load(product.getId());
-			throw FoundException.builder().message("Se encontró el producto id="+product.getId()).build();
+			throw FoundException.builder().message("Se encontró el producto id = " + product.getId()).build();
 		} catch (NotFoundException e) {
 			// log.trace(e.getMessage(), e);
 		}
 		
 		try {
 			load(product.getProduct());
-			throw FoundException.builder().message("Se encontró el producto "+product.getProduct()).build();
+			throw FoundException.builder().message("Se encontró el producto " + product.getProduct()).build();
 		} catch (NotFoundException e) {}
 		
 		try {
@@ -74,9 +73,7 @@ public class ProductBusiness implements IProductBusiness {
 			log.error(e.getMessage(),e);
 			throw BusinessException.builder().ex(e).build();
 		}
-		
 	}
-
 	
 	@Override
 	public List<Product> list() throws BusinessException {
@@ -88,21 +85,23 @@ public class ProductBusiness implements IProductBusiness {
 		}
 	}
 
-
 // 1 Arroz 189 true
 // 2 Leche 50  true
 
 // 1 Leche 190 true <-- esto no puede ocurrir!!!!!!
+	//load(product.getProduct()); CHacer todo para que esto funcione!!!!
 
 
 	@Override
 	public Product update(Product product) throws NotFoundException, BusinessException {
 		load(product.getId());
-		//load(product.getProduct()); CHacer todo para que esto funcione!!!!
+		Optional<Product> r = productDAO.findByProduct(product.getProduct());
+		if (r.isPresent())
+			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
+
 		try {
 			return productDAO.save(product);
 		} catch (Exception e) {
-
 			log.error(e.getMessage(),e);
 			throw BusinessException.builder().ex(e).build();
 		}

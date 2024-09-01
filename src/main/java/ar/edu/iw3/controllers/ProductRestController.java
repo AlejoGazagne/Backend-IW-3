@@ -31,7 +31,4 @@ public class ProductRestController extends BaseRestController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
-	
 }
