@@ -100,7 +100,7 @@ public class ProductBusiness implements IProductBusiness {
 //			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
 
 		try {
-			Optional<Product> r = productDAO.findByProductAndNotId(product.getProduct(), product.getId());
+			Optional<Product> r = productDAO.findByProductAndIdNot(product.getProduct(), product.getId());
 			if (r.isPresent())
 				throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
 		} catch (Exception e) {
