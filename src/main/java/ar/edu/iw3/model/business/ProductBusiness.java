@@ -96,7 +96,7 @@ public class ProductBusiness implements IProductBusiness {
 	public Product update(Product product) throws NotFoundException, BusinessException {
 		load(product.getId());
 		Optional<Product> r = productDAO.findByProduct(product.getProduct());
-		if (r.isPresent())
+		if (r.isPresent() && product.getId() != r.get().getId())
 			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
 
 		try {
