@@ -95,9 +95,19 @@ public class ProductBusiness implements IProductBusiness {
 	@Override
 	public Product update(Product product) throws NotFoundException, BusinessException {
 		load(product.getId());
-		Optional<Product> r = productDAO.findByProduct(product.getProduct());
-		if (r.isPresent() && product.getId() != r.get().getId())
-			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
+//		Optional<Product> r = productDAO.findByProduct(product.getProduct());
+//		if (r.isPresent() && product.getId() != r.get().getId())
+//			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
+
+		try {
+			Optional<Product> r = productDAO.findByProductAndNotId(product.getProduct(), product.getId());
+			if (r.isPresent())
+				throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw BusinessException.builder().ex(e).build();
+		}
+
 
 		try {
 			return productDAO.save(product);
