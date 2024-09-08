@@ -91,28 +91,25 @@ public class ProductBusiness implements IProductBusiness {
 // 1 Leche 190 true <-- esto no puede ocurrir!!!!!!
 	//load(product.getProduct()); CHacer todo para que esto funcione!!!!
 
-
 	@Override
-	public Product update(Product product) throws NotFoundException, BusinessException {
+	public Product update(Product product) throws FoundException, NotFoundException, BusinessException {
 		load(product.getId());
-//		Optional<Product> r = productDAO.findByProduct(product.getProduct());
-//		if (r.isPresent() && product.getId() != r.get().getId())
-//			throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
-
+		// load(product.getProduct());
+		Optional<Product> nombreExistente = null;
 		try {
-			Optional<Product> r = productDAO.findByProductAndIdNot(product.getProduct(), product.getId());
-			if (r.isPresent())
-				throw BusinessException.builder().message("Ya existe un producto con el nombre " + product.getProduct()).build();
+			nombreExistente = productDAO.findByProductAndIdNot(product.getProduct(), product.getId());
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
+			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
 		}
-
-
+		if (nombreExistente.isPresent()) {
+			throw FoundException.builder().message("Se encontró el Producto nombre=" + product.getProduct()).build();
+		}
 		try {
 			return productDAO.save(product);
 		} catch (Exception e) {
-			log.error(e.getMessage(),e);
+
+			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
 		}
 	}
@@ -120,7 +117,6 @@ public class ProductBusiness implements IProductBusiness {
 	@Override
 	public void delete(Product product) throws NotFoundException, BusinessException {
 		delete(product.getId());
-
 	}
 
 	@Override
@@ -132,7 +128,5 @@ public class ProductBusiness implements IProductBusiness {
 			log.error(e.getMessage(),e);
 			throw BusinessException.builder().ex(e).build();
 		}
-
 	}
-
 }
