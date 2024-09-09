@@ -125,6 +125,18 @@ public class ProductRestController extends BaseRestController {
 		}
 	}
 
+	@GetMapping(value = "/categories/by_name/{category}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> loadCategory(@PathVariable("category") String category) {
+		try {
+			return new ResponseEntity<>(categoryBusiness.load(category), HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
 	@PostMapping(value = "/categories")
 	public ResponseEntity<?> addCategory(@RequestBody Category category){
 		try {
