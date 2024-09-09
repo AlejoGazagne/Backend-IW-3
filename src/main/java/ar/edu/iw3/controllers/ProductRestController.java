@@ -16,7 +16,6 @@ import ar.edu.iw3.util.IStandartResponseBusiness;
 @RestController
 @RequestMapping(Constants.URL_PRODUCTS)
 public class ProductRestController extends BaseRestController {
-	// /produtos?precio=100# /a/?/c/d//////?param=valor&param1=valor&param=valor1
 	@Autowired
 	private IProductBusiness productBusiness;
 
@@ -156,7 +155,7 @@ public class ProductRestController extends BaseRestController {
 	public ResponseEntity<?> deleteCategory(@PathVariable("id") long id){
 		try {
 			categoryBusiness.delete(id);
-			return new ResponseEntity<>(HttpStatus.OK);
+			return new ResponseEntity<String>(HttpStatus.OK);
 		} catch (BusinessException e) {
 			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (NotFoundException e) {
