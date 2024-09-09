@@ -152,7 +152,7 @@ public class ProductRestController extends BaseRestController {
 	}
 
 	@DeleteMapping(value = "/categories/{id}")
-	public ResponseEntity<?> deleteCategory(@PathVariable("id") long id){
+	public ResponseEntity<?> deleteCategory(@PathVariable long id){
 		try {
 			categoryBusiness.delete(id);
 			return new ResponseEntity<String>(HttpStatus.OK);
