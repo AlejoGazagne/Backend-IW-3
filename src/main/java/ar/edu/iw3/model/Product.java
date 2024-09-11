@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "products")
 @AllArgsConstructor
@@ -29,7 +32,10 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "id_category", nullable = true)
 	private Category category;
-	
+
+	@ManyToMany(mappedBy = "products")
+	private Set<Provider> providers = new HashSet<>();
+
 	@Override
 	public String toString() {
 		return String.format("id=%s, product=%s, precio=%s, stock=%s ", this.getId(), this.getProduct(), this.getPrice(), this.isStock());
