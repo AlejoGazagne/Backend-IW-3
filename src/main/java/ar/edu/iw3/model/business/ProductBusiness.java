@@ -95,7 +95,7 @@ public class ProductBusiness implements IProductBusiness {
 	public Product update(Product product) throws FoundException, NotFoundException, BusinessException {
 		load(product.getId());
 		// load(product.getProduct());
-		Optional<Product> nombreExistente = null;
+		Optional<Product> nombreExistente;
 		try {
 			nombreExistente = productDAO.findByProductAndIdNot(product.getProduct(), product.getId());
 		} catch (Exception e) {
