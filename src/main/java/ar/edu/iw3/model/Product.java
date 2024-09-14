@@ -1,12 +1,17 @@
 package ar.edu.iw3.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -34,7 +39,8 @@ public class Product {
 	private Category category;
 
 	@ManyToMany(mappedBy = "products")
-	private Set<Provider> providers = new HashSet<>();
+	@JsonIgnoreProperties("products")
+	private List<Provider> providers = new ArrayList<>();
 
 	@Override
 	public String toString() {

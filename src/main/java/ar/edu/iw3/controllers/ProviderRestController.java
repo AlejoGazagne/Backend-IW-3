@@ -1,6 +1,5 @@
 package ar.edu.iw3.controllers;
 
-import ar.edu.iw3.model.Product;
 import ar.edu.iw3.model.Provider;
 import ar.edu.iw3.model.business.BusinessException;
 import ar.edu.iw3.model.business.FoundException;
@@ -60,10 +59,15 @@ public class ProviderRestController extends BaseRestController {
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_PROVIDER + "/" + response.getId());
             return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
-        } catch (BusinessException e) {
+        }
+        catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (FoundException e) {
+        }
+        catch (FoundException e) {
             return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+        }
+        catch (NotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

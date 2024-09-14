@@ -11,7 +11,7 @@ public interface IProviderBusiness {
 
     public Provider load(String provider) throws NotFoundException, BusinessException;
 
-    public Provider add(Provider provider) throws FoundException, BusinessException;
+    public Provider add(Provider provider) throws FoundException, BusinessException, NotFoundException;
 
     public Provider update(Provider provider) throws NotFoundException, BusinessException, FoundException;
 

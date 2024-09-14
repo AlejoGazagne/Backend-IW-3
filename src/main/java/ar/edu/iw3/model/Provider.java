@@ -1,12 +1,16 @@
 package ar.edu.iw3.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -30,5 +34,6 @@ public class Provider {
             joinColumns = @JoinColumn(name = "id_provider"),
             inverseJoinColumns = @JoinColumn(name = "id_product")
     )
-    private Set<Product> products = new HashSet<>();
+    @JsonIgnoreProperties("providers")
+    private List<Product> products = new ArrayList<>();
 }
