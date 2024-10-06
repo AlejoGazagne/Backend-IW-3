@@ -1,6 +1,9 @@
 package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.Category;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,9 +62,7 @@ public class CategoryBusiness implements ICategoryBusiness{
         try {
             load(category.getId());
             throw FoundException.builder().message("Se encontró la Categoría id = " + category.getId()).build();
-        } catch (NotFoundException e){
-
-        }
+        } catch (NotFoundException ignored){ }
         try {
             return categoryDAO.save(category);
         } catch (Exception e){

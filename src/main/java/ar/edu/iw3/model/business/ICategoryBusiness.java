@@ -1,6 +1,9 @@
 package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.Category;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
 
 import java.util.List;
 

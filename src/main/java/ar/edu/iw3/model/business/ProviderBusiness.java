@@ -1,14 +1,14 @@
 package ar.edu.iw3.model.business;
 
-import ar.edu.iw3.model.Product;
 import ar.edu.iw3.model.Provider;
-import ar.edu.iw3.model.persistence.ProductRepository;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.persistence.ProviderRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +18,6 @@ public class ProviderBusiness implements IProviderBusiness{
 
     @Autowired
     private ProviderRepository providerDAO;
-
-    @Autowired
-    private ProductRepository productDAO;
 
     @Override
     public List<Provider> list() throws BusinessException {
@@ -87,9 +84,7 @@ public class ProviderBusiness implements IProviderBusiness{
 //    }
 
     @Override
-    public Provider add(Provider provider) throws NotFoundException, BusinessException, FoundException {
-        List<Product> products = new ArrayList<>();
-        Optional<Product> existingProduct;
+    public Provider add(Provider provider) throws BusinessException, FoundException {
 
         try {
             load(provider.getId());
@@ -104,19 +99,6 @@ public class ProviderBusiness implements IProviderBusiness{
 
         }
 
-        for (Product product : provider.getProducts()) {
-            try{
-                existingProduct = productDAO.findById(product.getId());
-                if (existingProduct.isEmpty())
-                    throw NotFoundException.builder().message("[ERROR] No se encontró el producto " + product.getId()).build();
-                products.add(existingProduct.get());
-            }catch(Exception e){
-                log.error(e.getMessage(),e);
-                throw BusinessException.builder().ex(e).build();
-            }
-        }
-
-        provider.setProducts(products);
         try {
             return providerDAO.save(provider);
         } catch (Exception e) {
