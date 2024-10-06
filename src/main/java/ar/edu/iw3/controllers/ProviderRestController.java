@@ -1,10 +1,10 @@
 package ar.edu.iw3.controllers;
 
 import ar.edu.iw3.model.Provider;
-import ar.edu.iw3.model.business.BusinessException;
-import ar.edu.iw3.model.business.FoundException;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.IProviderBusiness;
-import ar.edu.iw3.model.business.NotFoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;

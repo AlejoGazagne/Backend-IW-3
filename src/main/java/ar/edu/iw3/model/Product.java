@@ -1,7 +1,5 @@
 package ar.edu.iw3.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,9 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -38,7 +34,10 @@ public class Product {
 	@JoinColumn(name = "id_category", nullable = true)
 	private Category category;
 
-	@ManyToMany(mappedBy = "products")
+	@ManyToMany
+	@JoinTable(name = "provider_product",
+			joinColumns = {@JoinColumn(name = "id_product", referencedColumnName = "id")},
+			inverseJoinColumns = {@JoinColumn(name = "id_provider", referencedColumnName = "id")})
 	@JsonIgnoreProperties("products")
 	private List<Provider> providers = new ArrayList<>();
 

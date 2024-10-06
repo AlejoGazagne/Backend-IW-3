@@ -1,9 +1,14 @@
 package ar.edu.iw3.model.business;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.aspectj.weaver.ast.Not;
+import ar.edu.iw3.model.Provider;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.persistence.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +23,9 @@ public class ProductBusiness implements IProductBusiness {
 	// IoC
 	@Autowired
 	private ProductRepository productDAO;
+
+	@Autowired
+	private ProviderRepository providerDAO;
 	
 	@Override
 	public Product load(long id) throws NotFoundException, BusinessException {
@@ -33,7 +41,6 @@ public class ProductBusiness implements IProductBusiness {
 			throw NotFoundException.builder().message("No se encuentra el Producto id = " + id).build();
 		
 		return r.get();
-		//return productDAO.findById(id).get();
 	}
 	
 	@Override
@@ -54,19 +61,32 @@ public class ProductBusiness implements IProductBusiness {
 
 	@Override
 	public Product add(Product product) throws FoundException, BusinessException {
-		
+		List<Provider> providers = new ArrayList<>();
+		Optional<Provider> existingProvider;
+
 		try {
 			load(product.getId());
 			throw FoundException.builder().message("Se encontró el producto id = " + product.getId()).build();
-		} catch (NotFoundException e) {
-			// log.trace(e.getMessage(), e);
-		}
+		} catch (NotFoundException ignored) {	}
 		
 		try {
 			load(product.getProduct());
 			throw FoundException.builder().message("Se encontró el producto " + product.getProduct()).build();
-		} catch (NotFoundException e) {}
-		
+		} catch (NotFoundException ignored) {}
+
+		for (Provider provider : product.getProviders()) {
+			try{
+				existingProvider = providerDAO.findById(provider.getId());
+				if (existingProvider.isEmpty())
+					throw NotFoundException.builder().message("[ERROR] No se encontró el producto " + product.getId()).build();
+				providers.add(existingProvider.get());
+			}catch(Exception e){
+				log.error(e.getMessage(),e);
+				throw BusinessException.builder().ex(e).build();
+			}
+		}
+
+		product.setProviders(providers);
 		try {
 			return productDAO.save(product);
 		} catch (Exception e) {
