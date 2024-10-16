@@ -1,11 +1,11 @@
 package ar.edu.iw3.model.business;
 
-import ar.edu.iw3.model.Product;
+import ar.edu.iw3.model.Client;
 import ar.edu.iw3.model.Truck;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
-import ar.edu.iw3.model.persistence.ProductRepository;
+import ar.edu.iw3.model.persistence.ClientRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,36 +14,35 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class ProductBusiness implements IProductBusiness{
-
+public class ClientBusiness implements IClientBusiness{
     @Autowired
-    private ProductRepository productDAO;
+    private ClientRepository clientDAO;
 
     @Override
-    public Product find(long id) throws NotFoundException, BusinessException {
-        Optional<Product> product;
+    public Client find(long id) throws NotFoundException, BusinessException {
+        Optional<Client> client;
         try {
-            product = productDAO.findById(id);
+            client = clientDAO.findById(id);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
 
-        if(product.isEmpty()) {
+        if(client.isEmpty()) {
             throw NotFoundException.builder().message("Truck not found, id = " + id).build();
         }
-        return product.get();
+        return client.get();
     }
 
     @Override
-    public Product add(Product product) throws FoundException, BusinessException {
+    public Client add(Client client) throws FoundException, BusinessException {
         try {
-            find(product.getId());
-            throw FoundException.builder().message("Truck exist, id = " + product.getId()).build();
+            find(client.getId());
+            throw FoundException.builder().message("Truck exist, id = " + client.getId()).build();
         } catch(NotFoundException ignored){
         }
         try {
-            return productDAO.save(product);
+            return clientDAO.save(client);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
