@@ -29,7 +29,7 @@ public class DriverBusiness implements IDriverBusiness {
         }
 
         if(driver.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("Driver not found, id = " + id).build();
         }
         return driver.get();
     }
@@ -38,7 +38,7 @@ public class DriverBusiness implements IDriverBusiness {
     public Driver add(Driver driver) throws FoundException, BusinessException {
         try {
             find(driver.getId());
-            throw FoundException.builder().message("Truck exist, id = " + driver.getId()).build();
+            throw FoundException.builder().message("Driver exist, id = " + driver.getId()).build();
         } catch(NotFoundException ignored){
         }
         try {

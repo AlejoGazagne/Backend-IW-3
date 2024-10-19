@@ -19,23 +19,23 @@ public class LoadData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column()
-    private long accumulatedMass;
+    @Column(nullable = false)
+    private float accumulatedMass;
 
-    @Column()
-    private long density;
+    @Column(nullable = false)
+    private float density;
 
-    @Column
+    @Column(nullable = false)
     private float temperature;
 
-    @Column
-    private long caudal;
+    @Column(nullable = false)
+    private float caudal;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column()
+    @Column(nullable = false)
     private Date timestampLoad;
 
-    @ManyToOne
-    @JoinColumn(name = "id_order")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_order", nullable = false)
     private Order order;
 }

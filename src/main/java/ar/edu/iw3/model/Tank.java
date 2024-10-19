@@ -17,7 +17,7 @@ public class Tank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column()
+    @Column(nullable = false)
     private long capacity;
 
     @ManyToOne

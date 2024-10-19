@@ -30,7 +30,7 @@ public class ProductBusiness implements IProductBusiness {
         }
 
         if(product.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("Product not found, id = " + id).build();
         }
         return product.get();
     }
@@ -39,7 +39,7 @@ public class ProductBusiness implements IProductBusiness {
     public Product add(Product product) throws FoundException, BusinessException {
         try {
             find(product.getId());
-            throw FoundException.builder().message("Truck exist, id = " + product.getId()).build();
+            throw FoundException.builder().message("Product exist, id = " + product.getId()).build();
         } catch(NotFoundException ignored){
         }
         try {

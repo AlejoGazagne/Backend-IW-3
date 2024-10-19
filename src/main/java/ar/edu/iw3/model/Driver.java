@@ -17,9 +17,12 @@ public class Driver {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column()
+    @Column(length = 50, nullable = false)
     private String name;
 
-    @Column
+    @Column(length = 50, nullable = false)
     private String lastname;
+
+    @Column(length = 50, nullable = false, unique = true)
+    private String document;
 }

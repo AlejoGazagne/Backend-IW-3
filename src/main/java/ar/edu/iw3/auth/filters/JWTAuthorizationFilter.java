@@ -49,7 +49,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 		UsernamePasswordAuthenticationToken authentication = getAuthentication(req, byHeader);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		chain.doFilter(req, res);
-
 	}
 
 	// Extraer el token JWT de la cabecera y lo intenta validar
@@ -61,7 +60,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
 		if (token != null) {
 			// Parseamos el token usando la librería
-			DecodedJWT jwt=null;
+			DecodedJWT jwt = null;
 			try {
 				jwt = JWT.require(Algorithm.HMAC512(AuthConstants.SECRET.getBytes())).build().verify(token);
 				log.trace("Token recibido por '{}'", byHeader ? "header" : "query param");
@@ -90,11 +89,8 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
-			
-			
 			return null;
 		}
 		return null;
 	}
-
 }
