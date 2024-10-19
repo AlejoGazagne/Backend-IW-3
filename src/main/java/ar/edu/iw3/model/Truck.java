@@ -20,12 +20,12 @@ public class Truck {
     private long id;
 
     @Column()
-    private String patente;
+    private String plate;
 
     @Column()
-    private String descripcion;
+    private String description;
 
     @OneToMany
-    @JoinColumn(name = "id_cisterna", nullable = false)
-    private List<Tank> cisterna;
+    @JoinColumn(name = "id_tank", nullable = false)
+    private List<Tank> tanks;
 }

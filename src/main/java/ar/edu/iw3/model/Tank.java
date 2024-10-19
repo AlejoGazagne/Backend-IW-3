@@ -18,9 +18,9 @@ public class Tank {
     private long id;
 
     @Column()
-    private long capacidad;
+    private long capacity;
 
     @ManyToOne
-    @JoinColumn(name = "id_camion")
-    private Truck camion;
+    @JoinColumn(name = "id_truck")
+    private Truck truck;
 }

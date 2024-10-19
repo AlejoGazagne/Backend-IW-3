@@ -18,8 +18,8 @@ public class Product {
     private long id;
 
     @Column()
-    private String nombre;
+    private String name;
 
     @Column()
-    private float temperaturaLimite;
+    private float limitTemperature;
 }

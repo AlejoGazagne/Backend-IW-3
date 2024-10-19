@@ -1,4 +1,4 @@
-package ar.edu.iw3.model.business;
+package ar.edu.iw3.model.business.interfaces;
 
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;

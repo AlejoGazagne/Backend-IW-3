@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "camiones")
+@Table(name = "client")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -18,6 +18,6 @@ public class Client {
     private long id;
 
     @Column()
-    private String razonSocial;
+    private String companyName;
 
 }
