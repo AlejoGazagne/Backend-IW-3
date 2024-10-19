@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Entity
-@Table(name = "datos_carga")
+@Table(name = "load_data")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -20,22 +20,22 @@ public class LoadData {
     private long id;
 
     @Column()
-    private long masaAcumulada;
+    private long accumulatedMass;
 
     @Column()
-    private long densidad;
+    private long density;
 
     @Column
-    private float temperatura;
+    private float temperature;
 
     @Column
     private long caudal;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date timestampCarga;
+    private Date timestampLoad;
 
     @ManyToOne
-    @JoinColumn(name = "id_orden")
-    private Order orden;
+    @JoinColumn(name = "id_order")
+    private Order order;
 }

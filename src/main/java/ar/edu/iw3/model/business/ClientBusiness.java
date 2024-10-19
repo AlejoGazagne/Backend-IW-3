@@ -1,10 +1,10 @@
 package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.Client;
-import ar.edu.iw3.model.Truck;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.interfaces.IClientBusiness;
 import ar.edu.iw3.model.persistence.ClientRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class ClientBusiness implements IClientBusiness{
+public class ClientBusiness implements IClientBusiness {
     @Autowired
     private ClientRepository clientDAO;
 

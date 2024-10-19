@@ -4,6 +4,7 @@ import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.interfaces.ILoadDataBusiness;
 import ar.edu.iw3.model.persistence.LoadDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

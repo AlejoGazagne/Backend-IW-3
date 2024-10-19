@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "choferes")
+@Table(name = "drivers")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -18,8 +18,8 @@ public class Driver {
     private long id;
 
     @Column()
-    private String nombre;
+    private String name;
 
     @Column
-    private String apellido;
+    private String lastname;
 }

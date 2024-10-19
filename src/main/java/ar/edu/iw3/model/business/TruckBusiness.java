@@ -4,6 +4,7 @@ import ar.edu.iw3.model.Truck;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.interfaces.ITruckBusiness;
 import ar.edu.iw3.model.persistence.TruckRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class TruckBusiness implements ITruckBusiness{
+public class TruckBusiness implements ITruckBusiness {
     @Autowired
     private TruckRepository truckDAO;
 

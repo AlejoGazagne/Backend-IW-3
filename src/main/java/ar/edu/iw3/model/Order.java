@@ -23,17 +23,17 @@ public class Order {
     @Column(length = 4, unique = true)
     private int password;
 
-    @Column()
+    @Column(nullable = false)
     private long preset;
 
-    @Column()
-    private long tara;
+    @Column(nullable = false)
+    private long tare;
 
     @Column()
-    private long pesoFinal;
+    private long finalWeight;
 
     @Column()
-    private long estado;
+    private long state;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
@@ -63,20 +63,20 @@ public class Order {
     private long valorPesoFinal;
 
     @Column()
-    private long ultimaMasa;
+    private long lastMass;
 
     @Column()
-    private long ultimaDensidad;
+    private long lastDensity;
 
     @Column()
-    private long ultimaTemperatura;
+    private long lastTemperature;
 
     @Column()
-    private long ultimoCaudal;
+    private long lastCaudal;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date ultimoTimestamp;
+    private Date lastTimestamp;
 
     @OneToOne
     @JoinColumn(name= "id_driver", nullable = false)
@@ -95,7 +95,7 @@ public class Order {
     private Product product;
 
     @OneToMany
-    @JoinColumn(name = "id_load_data", nullable = false)
+    @JoinColumn(name = "id_load_data")
     private List<LoadData> loadData;
 
 }
