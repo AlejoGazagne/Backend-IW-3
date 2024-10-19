@@ -29,7 +29,7 @@ public class ClientBusiness implements IClientBusiness {
         }
 
         if(client.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("Client not found, id = " + id).build();
         }
         return client.get();
     }
@@ -38,7 +38,7 @@ public class ClientBusiness implements IClientBusiness {
     public Client add(Client client) throws FoundException, BusinessException {
         try {
             find(client.getId());
-            throw FoundException.builder().message("Truck exist, id = " + client.getId()).build();
+            throw FoundException.builder().message("Client exist, id = " + client.getId()).build();
         } catch(NotFoundException ignored){
         }
         try {

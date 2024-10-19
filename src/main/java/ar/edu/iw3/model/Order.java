@@ -16,6 +16,13 @@ import java.util.List;
 @Getter
 @Setter
 public class Order {
+    public enum State{
+        RECEIVED,
+        FIRST_WEIGHING,
+        CHARGED,
+        SECOND_WEIGHING,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -24,78 +31,77 @@ public class Order {
     private int password;
 
     @Column(nullable = false)
-    private long preset;
+    private float preset;
+
+    @Column()
+    private float tare;
+
+    @Column()
+    private float finalWeight;
 
     @Column(nullable = false)
-    private long tare;
-
-    @Column()
-    private long finalWeight;
-
-    @Column()
-    private long state;
+    private State state;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaRecepcionInicial;
+    private Date dateReceived;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaPesajeInicial;
+    private Date dateFirstWeighing;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaInicioCarga;
+    private Date dateInitialCharge;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaFinCarga;
+    private Date dateFinalCharge;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaPesajeFinal;
+    private Date dateSecondWeighing;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date fechaPrevistaCarga;
+    private Date expectedChargeDate;
 
     @Column()
-    private long valorPesoFinal;
+    private float finalChargeWeight;
 
     @Column()
-    private long lastMass;
+    private float lastMass;
 
     @Column()
-    private long lastDensity;
+    private float lastDensity;
 
     @Column()
-    private long lastTemperature;
+    private float lastTemperature;
 
     @Column()
-    private long lastCaudal;
+    private float lastCaudal;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
     private Date lastTimestamp;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name= "id_driver", nullable = false)
     private Driver driver;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name= "id_truck", nullable = false)
     private Truck truck;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name= "id_client", nullable = false)
     private Client client;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_product", nullable = false)
     private Product product;
 
-    @OneToMany
-    @JoinColumn(name = "id_load_data")
+    @OneToMany(mappedBy = "order")
     private List<LoadData> loadData;
 
 }

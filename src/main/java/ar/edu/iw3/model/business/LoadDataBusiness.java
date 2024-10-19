@@ -30,7 +30,7 @@ public class LoadDataBusiness implements ILoadDataBusiness {
         }
 
         if(loadData.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("LoadData not found, id = " + id).build();
         }
         return loadData.get();
     }
@@ -39,7 +39,7 @@ public class LoadDataBusiness implements ILoadDataBusiness {
     public LoadData add(LoadData loadData) throws FoundException, BusinessException {
         try {
             find(loadData.getId());
-            throw FoundException.builder().message("Truck exist, id = " + loadData.getId()).build();
+            throw FoundException.builder().message("LoadData exist, id = " + loadData.getId()).build();
         } catch(NotFoundException ignored){
         }
         try {

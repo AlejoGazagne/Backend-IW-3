@@ -30,7 +30,7 @@ public class OrderBusiness implements IOrderBusiness {
         }
 
         if(order.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("Order not found, id = " + id).build();
         }
         return order.get();
     }
@@ -39,9 +39,11 @@ public class OrderBusiness implements IOrderBusiness {
     public Order add(Order order) throws FoundException, BusinessException {
         try {
             find(order.getId());
-            throw FoundException.builder().message("Truck exist, id = " + order.getId()).build();
+            throw FoundException.builder().message("Order exist, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
+        // TODO: validation of the rest of entities
+
         try {
             return orderDAO.save(order);
         } catch (Exception e) {

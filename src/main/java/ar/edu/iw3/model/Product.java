@@ -17,9 +17,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column()
+    @Column(length = 100, nullable = false, unique = true)
     private String name;
 
-    @Column()
+    @Column(nullable = false)
     private float limitTemperature;
 }
