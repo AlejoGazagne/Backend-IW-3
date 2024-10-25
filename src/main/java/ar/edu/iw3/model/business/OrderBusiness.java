@@ -4,6 +4,7 @@ import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.exceptions.StateException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.model.persistence.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class OrderBusiness implements IOrderBusiness {
     public Order add(Order order) throws FoundException, BusinessException {
         try {
             find(order.getId());
-            throw FoundException.builder().message("Order exist, id = " + order.getId()).build();
+            throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
         // TODO: validation of the rest of entities
@@ -82,5 +83,29 @@ public class OrderBusiness implements IOrderBusiness {
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
         }
+    }
+
+    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException {
+        Order order;
+        try {
+            order = find(id);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if (order.getState() != Order.State.RECEIVED) {
+            throw StateException.builder().message("This order has already begun or is already finished.").build();
+        }
+
+        try {
+            order.setTare(tare);
+            order.setState(Order.State.FIRST_WEIGHING);
+            orderDAO.save(order);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+        
     }
 }
