@@ -6,20 +6,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
-@Table(name = "products")
+@Table(name = "trucks")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Product {
+public class Truck {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = 100, nullable = false, unique = true)
-    private String name;
+    @Column(length = 10, nullable = false, unique = true)
+    private String plate;
 
-    @Column(nullable = false)
-    private float limitTemperature;
+    @Column()
+    private String description;
+
+    @OneToMany
+    @JoinColumn(name = "id_tank", nullable = false)
+    private List<Tank> tanks;
 }

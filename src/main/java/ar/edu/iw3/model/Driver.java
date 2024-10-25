@@ -7,19 +7,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "products")
+@Table(name = "drivers")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class Product {
+public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = 100, nullable = false, unique = true)
+    @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private float limitTemperature;
+    @Column(length = 50, nullable = false)
+    private String lastname;
+
+    @Column(length = 50, nullable = false, unique = true)
+    private String document;
 }

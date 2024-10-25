@@ -17,8 +17,6 @@ public class UserBusiness implements IUserBusiness {
 	@Autowired
 	private UserRepository userDAO;
 
-
-
 	@Override
 	public User load(String usernameOrEmail) throws NotFoundException, BusinessException {
 		Optional<User> ou;

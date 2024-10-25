@@ -49,6 +49,7 @@ public class AuthRestController extends BaseRestController {
 
 		User user = (User) auth.getPrincipal();
 		String token = JWT.create().withSubject(user.getUsername())
+				.withClaim("internalId", user.getIdUser())
 				.withClaim("roles", new ArrayList<String>(user.getAuthoritiesStr())).withClaim("email", user.getEmail())
 				.withClaim("version", "1.0.0")
 				.withExpiresAt(new Date(System.currentTimeMillis() + AuthConstants.EXPIRATION_TIME))
@@ -62,7 +63,7 @@ public class AuthRestController extends BaseRestController {
 	@GetMapping(value = "/demo/encodepass", produces = MediaType.TEXT_PLAIN_VALUE)
 	public ResponseEntity<?> encodepass(@RequestParam String password) {
 		try {
-			return new ResponseEntity<String>(pEncoder.encode("admin123"), HttpStatus.OK);
+			return new ResponseEntity<String>(pEncoder.encode(password), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);

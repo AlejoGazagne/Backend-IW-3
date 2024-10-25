@@ -59,9 +59,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
 		if (!pEncoder.matches(password, user.getPassword()))
 			throw new BadCredentialsException("Invalid password");
 
-		return new UsernamePasswordAuthenticationToken(user, null);
-
-		
+		return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 	}
 	@SuppressWarnings("serial")
 	public Authentication authWrap(String name, String pass) {
