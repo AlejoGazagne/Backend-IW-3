@@ -85,9 +85,6 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-
-
-
     public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException {
         Order order;
         try {
@@ -111,11 +108,4 @@ public class OrderBusiness implements IOrderBusiness {
         }
         
     }
-
-    
-    
-
-
-
-
 }

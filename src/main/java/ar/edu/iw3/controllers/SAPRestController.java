@@ -36,7 +36,4 @@ public class SAPRestController extends BaseRestController {
             return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
         }
     }
-
-        
-
 }

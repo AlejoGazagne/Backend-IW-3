@@ -20,4 +20,5 @@ public interface IOrderBusiness {
     public Order update(Order order) throws NotFoundException, BusinessException;
 
     public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException;
+
 }
