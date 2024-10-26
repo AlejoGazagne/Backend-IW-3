@@ -1,5 +1,6 @@
 package ar.edu.iw3.model.business;
 
+import ar.edu.iw3.model.Client;
 import ar.edu.iw3.model.Driver;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
@@ -48,4 +49,38 @@ public class DriverBusiness implements IDriverBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Override
+    public Driver findOrCreate(Driver driver) throws BusinessException {
+        Optional<Driver> tmp;
+        try {
+            tmp = driverDAO.findById(driver.getId());
+            return tmp.orElseGet(() -> driverDAO.save(driver));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Driver update(Driver driver) throws FoundException, NotFoundException, BusinessException {
+        find(driver.getId());
+        Optional<Driver> existingDriver = null;
+        try {
+            existingDriver = driverDAO.findById(driver.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if(existingDriver.isPresent()) {
+            throw FoundException.builder().message("Se encontro un Driver con id = " + driver.getId()).build();
+        }
+        try {
+            return driverDAO.save(driver);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
 }

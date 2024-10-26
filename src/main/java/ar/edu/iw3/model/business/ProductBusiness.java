@@ -49,4 +49,25 @@ public class ProductBusiness implements IProductBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Override
+    public Product update(Product product) throws FoundException, NotFoundException, BusinessException {
+        find(product.getId());
+        Optional<Product> existingProduct = null;
+        try {
+            existingProduct = productDAO.findById(product.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if ( existingProduct.isPresent() ) {
+            throw FoundException.builder().message("Producto encontrado id = " + product.getId() + ", nombre = " + product.getName()).build();
+        }
+        try {
+            return productDAO.save(product);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
 }

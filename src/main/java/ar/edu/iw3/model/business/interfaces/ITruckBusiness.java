@@ -9,4 +9,8 @@ public interface ITruckBusiness {
     public Truck find(long id) throws NotFoundException, BusinessException;
 
     public Truck add(Truck truck) throws FoundException, BusinessException;
+
+    public Truck findOrCreate(Truck truck) throws BusinessException;
+
+    public Truck update(Truck truck) throws NotFoundException, BusinessException, FoundException;
 }

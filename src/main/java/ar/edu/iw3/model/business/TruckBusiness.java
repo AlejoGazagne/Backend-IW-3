@@ -48,4 +48,37 @@ public class TruckBusiness implements ITruckBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Override
+    public Truck findOrCreate(Truck truck) throws BusinessException {
+        Optional<Truck> tmp;
+        try {
+            tmp = truckDAO.findById(truck.getId());
+            return tmp.orElseGet(() -> truckDAO.save(truck));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Truck update(Truck truck) throws FoundException, NotFoundException, BusinessException {
+        find(truck.getId());
+        Optional<Truck> truckExistente = null;
+        try {
+            truckExistente = truckDAO.findById(truck.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if (truckExistente.isPresent()) {
+            throw FoundException.builder().message("Se encontró el Truck con patente = " + truck.getPlate()).build();
+        }
+        try {
+            return truckDAO.save(truck);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
 }
