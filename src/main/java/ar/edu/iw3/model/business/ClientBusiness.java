@@ -35,6 +35,22 @@ public class ClientBusiness implements IClientBusiness {
     }
 
     @Override
+    public Client find(String client) throws NotFoundException, BusinessException {
+        Optional<Client> c;
+        try {
+            c = clientDAO.findByCompanyName(client);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(c.isEmpty()) {
+            throw NotFoundException.builder().message("Client not found, name = " + client).build();
+        }
+        return c.get();
+    }
+
+    @Override
     public Client add(Client client) throws FoundException, BusinessException {
         try {
             find(client.getId());
@@ -45,6 +61,41 @@ public class ClientBusiness implements IClientBusiness {
             return clientDAO.save(client);
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Client update(Client client) throws FoundException, NotFoundException, BusinessException {
+        find(client.getId());
+        Optional<Client> existingClient = null;
+        try {
+            existingClient = clientDAO.findById(client.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(existingClient.isPresent()) {
+            throw FoundException.builder().message("Se encontro el cliente id = " + client.getId()).build();
+        }
+
+        try {
+            return clientDAO.save(client);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Client findOrCreate(Client client) throws BusinessException {
+        Optional<Client> tmp;
+        try {
+            tmp = clientDAO.findByCompanyName(client.getCompanyName());
+            return tmp.orElseGet(() -> clientDAO.save(client));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
     }

@@ -28,4 +28,14 @@ public class Truck {
     @OneToMany
     @JoinColumn(name = "id_tank", nullable = false)
     private List<Tank> tanks;
+
+    @Override
+    public String toString() {
+        return "Truck{" +
+                "id=" + id +
+                ", plate='" + plate + '\'' +
+                ", description='" + description + '\'' +
+                ", tanks=" + tanks +
+                '}';
+    }
 }

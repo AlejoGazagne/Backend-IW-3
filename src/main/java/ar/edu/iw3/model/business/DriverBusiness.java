@@ -35,6 +35,22 @@ public class DriverBusiness implements IDriverBusiness {
     }
 
     @Override
+    public Driver find(String driver) throws NotFoundException, BusinessException {
+        Optional<Driver> d;
+        try {
+            d = driverDAO.findByDocument(driver);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(d.isEmpty()) {
+            throw NotFoundException.builder().message("Driver not found, name = " + driver).build();
+        }
+        return d.get();
+    }
+
+    @Override
     public Driver add(Driver driver) throws FoundException, BusinessException {
         try {
             find(driver.getId());
@@ -48,4 +64,38 @@ public class DriverBusiness implements IDriverBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Override
+    public Driver findOrCreate(Driver driver) throws BusinessException {
+        Optional<Driver> tmp;
+        try {
+            tmp = driverDAO.findByDocument(driver.getDocument());
+            return tmp.orElseGet(() -> driverDAO.save(driver));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Driver update(Driver driver) throws FoundException, NotFoundException, BusinessException {
+        find(driver.getId());
+        Optional<Driver> existingDriver = null;
+        try {
+            existingDriver = driverDAO.findById(driver.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if(existingDriver.isPresent()) {
+            throw FoundException.builder().message("Se encontro un Driver con id = " + driver.getId()).build();
+        }
+        try {
+            return driverDAO.save(driver);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
 }

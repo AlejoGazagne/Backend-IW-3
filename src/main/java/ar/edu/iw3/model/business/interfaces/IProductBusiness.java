@@ -8,5 +8,9 @@ import ar.edu.iw3.model.business.exceptions.NotFoundException;
 public interface IProductBusiness {
     public Product find(long id) throws NotFoundException, BusinessException;
 
+    public Product find(String product) throws NotFoundException, BusinessException;
+
     public Product add(Product product) throws FoundException, BusinessException;
+
+    public Product update(Product product) throws FoundException, NotFoundException, BusinessException;
 }

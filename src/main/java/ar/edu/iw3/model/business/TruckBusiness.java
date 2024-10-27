@@ -35,6 +35,21 @@ public class TruckBusiness implements ITruckBusiness {
     }
 
     @Override
+    public Truck find(String truck) throws NotFoundException, BusinessException {
+        Optional<Truck> t;
+        try {
+            t = truckDAO.findByPlate(truck);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if (t.isEmpty()) {
+            throw NotFoundException.builder().message("Truck not found, plate = " + truck).build();
+        }
+        return t.get();
+    }
+
+    @Override
     public Truck add(Truck truck) throws FoundException, BusinessException {
         try {
             find(truck.getId());
@@ -45,6 +60,39 @@ public class TruckBusiness implements ITruckBusiness {
             return truckDAO.save(truck);
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Truck findOrCreate(Truck truck) throws BusinessException {
+        Optional<Truck> tmp;
+        try {
+            tmp = truckDAO.findByPlate(truck.getPlate());
+            return tmp.orElseGet(() -> truckDAO.save(truck));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Truck update(Truck truck) throws FoundException, NotFoundException, BusinessException {
+        find(truck.getId());
+        Optional<Truck> truckExistente;
+        try {
+            truckExistente = truckDAO.findById(truck.getId());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if (truckExistente.isPresent()) {
+            throw FoundException.builder().message("Se encontró el Truck con patente = " + truck.getPlate()).build();
+        }
+        try {
+            return truckDAO.save(truck);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
     }
