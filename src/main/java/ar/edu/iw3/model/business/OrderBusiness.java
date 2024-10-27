@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,6 +82,9 @@ public class OrderBusiness implements IOrderBusiness {
     private ITruckBusiness truckBusiness;
 
     @Autowired
+    private ITankBusiness tankBusiness;
+
+    @Autowired
     private IProductBusiness productBusiness;
 
     @Override
@@ -90,36 +94,40 @@ public class OrderBusiness implements IOrderBusiness {
             throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
-        // TODO: validar el resto de entidades?
+        // TODO: validar el resto de entidades? falta tank
+        // TODO: falta poner fecha actual en la orden
         // Validate and findOrCreate related entities
-//        try {
-//            order.setDriver(driverBusiness.findOrCreate(order.getDriver()));
-//            order.setClient(clientBusiness.findOrCreate(order.getClient()));
-//            order.setTruck(truckBusiness.findOrCreate(order.getTruck()));
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            throw BusinessException.builder().ex(e).build();
-//        }
+        try {
+            order.setDriver(driverBusiness.findOrCreate(order.getDriver()));
+            order.setClient(clientBusiness.findOrCreate(order.getClient()));
+            order.setTruck(truckBusiness.findOrCreate(order.getTruck()));
+            order.setProduct(productBusiness.find(order.getProduct().getName()));
+            order.setState(Order.State.RECEIVED);
+            order.setDateReceived(JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
 
         try {
             return orderDAO.save(order);
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw BusinessException.builder().ex(e).build();
+            throw BusinessException.builder().message("Error al guardar la orden").ex(e).build();
         }
     }
 
     @Override
     public Order addExternal(String json) throws BusinessException, FoundException {
-        ObjectMapper mapper = JsonUtiles.getObjectMapper(Order.class, new OrderJsonDeserializer(Order.class, clientBusiness, driverBusiness, truckBusiness, productBusiness), null);
-        Order order = null;
+        ObjectMapper mapper = JsonUtiles.getObjectMapper(Order.class, new OrderJsonDeserializer(Order.class, clientBusiness, driverBusiness, truckBusiness, productBusiness, tankBusiness), null);
+        Order order;
         try {
             order = mapper.readValue(json, Order.class);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage() + " este?");
             throw BusinessException.builder().ex(e).build();
         }
-        return order;
+        return add(order);
     }
 
     public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException {

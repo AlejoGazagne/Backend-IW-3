@@ -44,7 +44,7 @@ public class SAPRestController extends BaseRestController {
         try {
             Order response = orderBusiness.addExternal(httpEntity.getBody());
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("location", Constants.URL_SAP + "/order/" + response.getId() + "objeto: " + response);
+            responseHeaders.set("location", Constants.URL_SAP + "/order/" + response.getId());
             return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

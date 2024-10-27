@@ -28,7 +28,7 @@ public class Order {
     private long id;
 
     @Column(length = 4, unique = true)
-    private int password;
+    private Integer password;
 
     @Column(nullable = false)
     private float preset;
@@ -104,4 +104,32 @@ public class Order {
     @OneToMany(mappedBy = "order")
     private List<LoadData> loadData;
 
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", password=" + password +
+                ", preset=" + preset +
+                ", tare=" + tare +
+                ", finalWeight=" + finalWeight +
+                ", state=" + state +
+                ", dateReceived=" + dateReceived +
+                ", dateFirstWeighing=" + dateFirstWeighing +
+                ", dateInitialCharge=" + dateInitialCharge +
+                ", dateFinalCharge=" + dateFinalCharge +
+                ", dateSecondWeighing=" + dateSecondWeighing +
+                ", expectedChargeDate=" + expectedChargeDate +
+                ", finalChargeWeight=" + finalChargeWeight +
+                ", lastMass=" + lastMass +
+                ", lastDensity=" + lastDensity +
+                ", lastTemperature=" + lastTemperature +
+                ", lastCaudal=" + lastCaudal +
+                ", lastTimestamp=" + lastTimestamp +
+                ", driver=" + driver +
+                ", truck=" + truck +
+                ", client=" + client +
+                ", product=" + product +
+                ", loadData=" + loadData +
+                '}';
+    }
 }

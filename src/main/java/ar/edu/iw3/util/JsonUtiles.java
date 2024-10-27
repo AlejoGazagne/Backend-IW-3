@@ -2,10 +2,13 @@ package ar.edu.iw3.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import ar.edu.iw3.model.*;
+import ar.edu.iw3.model.business.exceptions.BusinessException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -27,7 +30,6 @@ public class JsonUtiles {
         mapper.setDateFormat(df);
         mapper.registerModule(module);
         return mapper;
-
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -101,15 +103,15 @@ public class JsonUtiles {
     }
 
     private static final List<String> DATE_FORMATS = List.of(
+            "yyyy-MM-dd'T'HH:mm:ss",
             "yyyy-MM-dd'T'HH:mm:ss'Z'",
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
             "yyyy-MM-dd",
             "MM/dd/yyyy",
-            "dd-MM-yyyy",
-            "yyyy-MM-dd'T'HH:mm:ss"
+            "dd-MM-yyyy"
     );
 
-    public static Date getDate(JsonNode node, String[] attrs, String defaultValue) {
+    public static Date getDate(JsonNode node, String[] attrs, Date defaultValue) {
         for (String attr : attrs) {
             if (node.has(attr) && !node.get(attr).isNull()) {
                 String dateStr = node.get(attr).asText();
@@ -120,10 +122,10 @@ public class JsonUtiles {
             }
         }
         // Si no se encuentra una fecha válida en los atributos, intentar con el valor predeterminado
-        return parseDate(defaultValue);
+        return defaultValue;
     }
 
-    private static Date parseDate(String dateStr) {
+    public static Date parseDate(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) return null;
 
         for (String format : DATE_FORMATS) {
@@ -188,6 +190,67 @@ public class JsonUtiles {
                     return objectMapper.treeToValue(node.get(key), type);
                 } catch (Exception e) {
                     System.err.println("Error al convertir el valor de '" + key + "' al tipo " + type.getSimpleName() + ": " + e.getMessage());
+                }
+            }
+        }
+        // Si no se encontró un valor válido, devuelve el valor predeterminado
+        return null;
+    }
+
+    public static Client getClient(JsonNode node, String[] keys, Class<Client> type) throws BusinessException {
+        for (String key : keys) {
+            if (node.has(key) && !node.get(key).isNull()) {
+                try {
+                    // Intenta convertir el nodo JSON al tipo especificado
+                    return objectMapper.treeToValue(node.get(key), type);
+                } catch (Exception e) {
+                    throw BusinessException.builder().message("Error al mappear el cliente").ex(e).build();
+                    //System.err.println("Error al convertir el valor de '" + key + "' al tipo " + type.getSimpleName() + ": " + e.getMessage());
+                }
+            }
+        }
+        // Si no se encontró un valor válido, devuelve el valor predeterminado
+        return null;
+    }
+
+    public static Driver getDriver(JsonNode node, String[] keys, Class<Driver> type) throws BusinessException {
+        for (String key : keys) {
+            if (node.has(key) && !node.get(key).isNull()) {
+                try {
+                    // Intenta convertir el nodo JSON al tipo especificado
+                    return objectMapper.treeToValue(node.get(key), type);
+                } catch (Exception e) {
+                    throw BusinessException.builder().message("Error al mappear el Driver").ex(e).build();
+                }
+            }
+        }
+        // Si no se encontró un valor válido, devuelve el valor predeterminado
+        return null;
+    }
+
+    public static Product getProduct(JsonNode node, String[] keys, Class<Product> type) throws BusinessException {
+        for (String key : keys) {
+            if (node.has(key) && !node.get(key).isNull()) {
+                try {
+                    // Intenta convertir el nodo JSON al tipo especificado
+                    return objectMapper.treeToValue(node.get(key), type);
+                } catch (Exception e) {
+                    throw BusinessException.builder().message("Error al mappear el Producto").ex(e).build();
+                }
+            }
+        }
+        // Si no se encontró un valor válido, devuelve el valor predeterminado
+        return null;
+    }
+
+    public static Truck getTruck(JsonNode node, String[] keys, Class<Truck> type) throws BusinessException {
+        for (String key : keys) {
+            if (node.has(key) && !node.get(key).isNull()) {
+                try {
+                    // Intenta convertir el nodo JSON al tipo especificado
+                    return objectMapper.treeToValue(node.get(key), type);
+                } catch (Exception e) {
+                    throw BusinessException.builder().message("Error al mappear el Camión").ex(e).build();
                 }
             }
         }

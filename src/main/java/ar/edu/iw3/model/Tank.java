@@ -23,4 +23,13 @@ public class Tank {
     @ManyToOne
     @JoinColumn(name = "id_truck")
     private Truck truck;
+
+    @Override
+    public String toString() {
+        return "Tank{" +
+                "id=" + id +
+                ", capacity=" + capacity +
+                ", truck=" + (truck != null ? truck.getId() : null) +
+                '}';
+    }
 }

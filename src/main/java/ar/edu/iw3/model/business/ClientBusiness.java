@@ -35,6 +35,22 @@ public class ClientBusiness implements IClientBusiness {
     }
 
     @Override
+    public Client find(String client) throws NotFoundException, BusinessException {
+        Optional<Client> c;
+        try {
+            c = clientDAO.findByCompanyName(client);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(c.isEmpty()) {
+            throw NotFoundException.builder().message("Client not found, name = " + client).build();
+        }
+        return c.get();
+    }
+
+    @Override
     public Client add(Client client) throws FoundException, BusinessException {
         try {
             find(client.getId());
@@ -76,7 +92,7 @@ public class ClientBusiness implements IClientBusiness {
     public Client findOrCreate(Client client) throws BusinessException {
         Optional<Client> tmp;
         try {
-            tmp = clientDAO.findById(client.getId());
+            tmp = clientDAO.findByCompanyName(client.getCompanyName());
             return tmp.orElseGet(() -> clientDAO.save(client));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
