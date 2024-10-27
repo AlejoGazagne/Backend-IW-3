@@ -3,6 +3,13 @@ package ar.edu.iw3.auth.controller;
 import java.util.ArrayList;
 import java.util.Date;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,12 +35,21 @@ import ar.edu.iw3.controllers.Constants;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 
 @RestController
+@Tag(description = "API de autenticación", name = "Auth")
 public class AuthRestController extends BaseRestController {
 	@Autowired
 	private AuthenticationManager authManager;
 	@Autowired
 	private IStandartResponseBusiness response;
 
+	@Operation(operationId = "Login", summary = "Login de usuario")
+	@Parameter(in = ParameterIn.PATH, name = "username", description = "Nombre de usuario", required = true)
+	@Parameter(in = ParameterIn.PATH, name = "password", description = "Contraseña", required = true)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Login exitoso", content = @Content(mediaType = "text/plain")),
+			@ApiResponse(responseCode = "401", description = "Usuario o contraseña incorrectos"),
+			@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@PostMapping(value = Constants.URL_LOGIN, produces = MediaType.TEXT_PLAIN_VALUE)
 	public ResponseEntity<?> loginExternalOnlyToken(@RequestParam String username, @RequestParam String password) {
 		Authentication auth = null;
@@ -57,9 +73,16 @@ public class AuthRestController extends BaseRestController {
 
 		return new ResponseEntity<String>(token, HttpStatus.OK);
 	}
+
 	@Autowired
 	private PasswordEncoder pEncoder;
 
+	@Operation(operationId = "EncodePass", summary = "Codifica una contraseña")
+	@Parameter(in = ParameterIn.PATH, name = "password", description = "Contraseña a codificar", required = true)
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Contraseña codificada", content = @Content(mediaType = "text/plain")),
+			@ApiResponse(responseCode = "500", description = "Error interno del servidor")
+	})
 	@GetMapping(value = "/demo/encodepass", produces = MediaType.TEXT_PLAIN_VALUE)
 	public ResponseEntity<?> encodepass(@RequestParam String password) {
 		try {

@@ -5,12 +5,15 @@ import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(Constants.URL_SAP)
+@Tag(description = "API del servicio SAP (Carga de la orden)", name = "SAP")
 public class SAPRestController extends BaseRestController {
     @Autowired
     private IStandartResponseBusiness response;
@@ -25,6 +29,8 @@ public class SAPRestController extends BaseRestController {
     @Autowired
     private IOrderBusiness orderBusiness;
 
+//    @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
+//    @Parameter(in = ParameterIn.QUERY, name = "order", description = "Orden de carga", required = true)
     @PostMapping("/order")
     public ResponseEntity<?> createOrder(@RequestBody Order order) {
         try {
@@ -39,6 +45,8 @@ public class SAPRestController extends BaseRestController {
         }
     }
 
+    @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
+    @Parameter(in = ParameterIn.DEFAULT, name = "order", description = "Orden de carga", required = true)
     @PostMapping("/order/external")
     public ResponseEntity<?> addExternal(HttpEntity<String> httpEntity){
         try {
