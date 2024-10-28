@@ -2,13 +2,11 @@ package ar.edu.iw3.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import ar.edu.iw3.model.*;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.OrderDeserializationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -139,7 +137,7 @@ public class JsonUtiles {
         return null; // Devuelve null si no se encuentra un formato coincidente
     }
 
-    public static long getLong(JsonNode node, String[] orderNumber, long defaultValue) {
+    public static long getLong(JsonNode node, String[] orderNumber, long defaultValue) throws OrderDeserializationException{
         for (String key : orderNumber) {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
@@ -147,7 +145,8 @@ public class JsonUtiles {
                     return Math.round(node.get(key).asDouble());
                 } catch (NumberFormatException e) {
                     // Maneja el caso de formato incorrecto si ocurre
-                    System.err.println("Error: el valor del nodo no es un número válido.");
+                    throw new OrderDeserializationException("Error al convertir el valor del nodo a un número long.");
+                    //System.err.println("Error: el valor del nodo no es un número válido.");
                 }
             }
         }
@@ -197,14 +196,14 @@ public class JsonUtiles {
         return null;
     }
 
-    public static Client getClient(JsonNode node, String[] keys, Class<Client> type) throws BusinessException {
+    public static Client getClient(JsonNode node, String[] keys, Class<Client> type) throws OrderDeserializationException {
         for (String key : keys) {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
                     return objectMapper.treeToValue(node.get(key), type);
                 } catch (Exception e) {
-                    throw BusinessException.builder().message("Error al mappear el cliente").ex(e).build();
+                    throw new OrderDeserializationException("Error al mappear el cliente");
                     //System.err.println("Error al convertir el valor de '" + key + "' al tipo " + type.getSimpleName() + ": " + e.getMessage());
                 }
             }
@@ -213,14 +212,14 @@ public class JsonUtiles {
         return null;
     }
 
-    public static Driver getDriver(JsonNode node, String[] keys, Class<Driver> type) throws BusinessException {
+    public static Driver getDriver(JsonNode node, String[] keys, Class<Driver> type) throws OrderDeserializationException {
         for (String key : keys) {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
                     return objectMapper.treeToValue(node.get(key), type);
                 } catch (Exception e) {
-                    throw BusinessException.builder().message("Error al mappear el Driver").ex(e).build();
+                    throw new OrderDeserializationException("Error al mappear el Driver");
                 }
             }
         }
@@ -228,14 +227,14 @@ public class JsonUtiles {
         return null;
     }
 
-    public static Product getProduct(JsonNode node, String[] keys, Class<Product> type) throws BusinessException {
+    public static Product getProduct(JsonNode node, String[] keys, Class<Product> type) throws OrderDeserializationException {
         for (String key : keys) {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
                     return objectMapper.treeToValue(node.get(key), type);
                 } catch (Exception e) {
-                    throw BusinessException.builder().message("Error al mappear el Producto").ex(e).build();
+                    throw new OrderDeserializationException("Error al mappear el Product");
                 }
             }
         }
@@ -243,14 +242,34 @@ public class JsonUtiles {
         return null;
     }
 
-    public static Truck getTruck(JsonNode node, String[] keys, Class<Truck> type) throws BusinessException {
+    public static Truck getTruck(JsonNode node, String[] keys, Class<Truck> type) throws OrderDeserializationException {
         for (String key : keys) {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
                     return objectMapper.treeToValue(node.get(key), type);
                 } catch (Exception e) {
-                    throw BusinessException.builder().message("Error al mappear el Camión").ex(e).build();
+                    throw new OrderDeserializationException("Error al mappear el Truck");
+                }
+            }
+        }
+        // Si no se encontró un valor válido, devuelve el valor predeterminado
+        return null;
+    }
+
+    public static List<Tank> getTank(JsonNode node, String[] keys, Class<Tank> type) throws OrderDeserializationException {
+        node = node.get("truck");
+        for (String key : keys) {
+            if (node.has(key) && !node.get(key).isNull()) {
+                try {
+                    // Intenta convertir el nodo JSON al tipo especificado
+                    List<Tank> tanks = new ArrayList<>(List.of());
+                    for(JsonNode i: node.get(key)){
+                        tanks.add(objectMapper.treeToValue(i, type));
+                    }
+                    return tanks;
+                } catch (Exception e) {
+                    throw new OrderDeserializationException("Error al mappear el Tank");
                 }
             }
         }

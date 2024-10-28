@@ -1,7 +1,7 @@
 package ar.edu.iw3.model.deserializers;
 
 import ar.edu.iw3.model.*;
-import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.OrderDeserializationException;
 import ar.edu.iw3.model.business.interfaces.*;
 import ar.edu.iw3.util.JsonUtiles;
 import com.fasterxml.jackson.core.JacksonException;
@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import static ar.edu.iw3.util.JsonConstants.*;
 
@@ -42,40 +43,39 @@ public class OrderJsonDeserializer extends StdDeserializer<Order> {
         Order order = new Order();
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-        long idOrder = JsonUtiles.getLong(node, ORDER_NUMBER, 0);
-        Date expectedChargeDate = JsonUtiles.getDate(node, EXPECTED_CHARGE_DATE, null);
-        float preset = JsonUtiles.getFloat(node, PRESET, 0);
-
-        order.setId(idOrder);
-        order.setExpectedChargeDate(expectedChargeDate);
-        order.setPreset(preset);
-
-//        if (driver != null){
-//            try {
-//                order.setDriver(driverBusiness.findOrCreate(driver));
-//            } catch (BusinessException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
-        Client client;
-        Driver driver;
-        Product product;
-        Truck truck;
         try {
-            client = JsonUtiles.getClient(node, CLIENT, Client.class);
-            driver = JsonUtiles.getDriver(node, DRIVER, Driver.class);
-            product = JsonUtiles.getProduct(node, PRODUCT, Product.class);
-            truck = JsonUtiles.getTruck(node, TRUCK, Truck.class);
-        } catch (BusinessException e) {
-            throw new RuntimeException(e);
+            // Obtener valores del nodo
+            long idOrder = JsonUtiles.getLong(node, ORDER_NUMBER, 0);
+            Date expectedChargeDate = JsonUtiles.getDate(node, EXPECTED_CHARGE_DATE, null);
+            float preset = JsonUtiles.getFloat(node, PRESET, 0);
+            Client client = JsonUtiles.getClient(node, CLIENT, Client.class);
+            Driver driver = JsonUtiles.getDriver(node, DRIVER, Driver.class);
+            Product product = JsonUtiles.getProduct(node, PRODUCT, Product.class);
+            Truck truck = JsonUtiles.getTruck(node, TRUCK, Truck.class);
+            List<Tank> tanks = JsonUtiles.getTank(node, TANK, Tank.class);
+
+            // Asignar valores a la orden
+            order.setId(idOrder);
+            order.setExpectedChargeDate(expectedChargeDate);
+            order.setPreset(preset);
+            order.setClient(client);
+            order.setDriver(driver);
+            order.setProduct(product);
+
+            // Validar y asignar camión y tanques
+            if (truck != null) {
+                if (tanks != null) {
+                    for (Tank tank : tanks) {
+                        tank.setTruck(truck);
+                    }
+                    truck.setTanks(tanks);
+                }
+                order.setTruck(truck);
+            }
+
+        } catch (Exception e) {
+            throw new OrderDeserializationException("Error al deserializar la orden: " + e.getMessage(), e);
         }
-        // TODO: como hacemos con los tank?
-
-        order.setDriver(driver);
-        order.setTruck(truck);
-        order.setClient(client);
-        order.setProduct(product);
-
         return order;
     }
 }

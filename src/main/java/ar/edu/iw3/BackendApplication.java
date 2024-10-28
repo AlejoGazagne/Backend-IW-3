@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -59,7 +60,19 @@ public class BackendApplication  implements CommandLineRunner{
 //		String json = "{\"id\": 123, \"preset\": 100.0, \"expectedChargeDate\": \"2023-11-22T12:34:56\", \"driver\": {\"id\": 456, \"name\": \"alejo\", \"lastname\": \"gazagne\", \"document\": \"321321\"}}";;
 //		//String json = "{\"id\": 123, \"preset\": 100.0, \"expectedChargeDate\": \"2023-11-22T12:34:56\"}";;
 //		Order order = orderBusiness.addExternal(json);
+		
+//		Truck truck = new Truck();
+//		truck.setId(4);
+//		truck.setPlate("ggg123");
+//		List<Tank> tanks = new ArrayList<>();
+//		Tank tank = new Tank();
+//		tank.setCapacity(1000);
+//		tank.setTruck(truck);
+//		tanks.add(tank);
+//		truck.setTanks(tanks);
+//		truckBusiness.add(truck);
 
+		
 		/*
 		try {
 			Product p=new Product();

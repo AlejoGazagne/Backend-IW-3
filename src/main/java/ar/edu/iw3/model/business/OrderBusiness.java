@@ -1,14 +1,15 @@
 package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.Order;
-import ar.edu.iw3.model.business.exceptions.BusinessException;
-import ar.edu.iw3.model.business.exceptions.FoundException;
-import ar.edu.iw3.model.business.exceptions.NotFoundException;
-import ar.edu.iw3.model.business.exceptions.StateException;
+import ar.edu.iw3.model.Tank;
+import ar.edu.iw3.model.Truck;
+import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.*;
 import ar.edu.iw3.model.deserializers.OrderJsonDeserializer;
 import ar.edu.iw3.model.persistence.OrderRepository;
 import ar.edu.iw3.util.JsonUtiles;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,11 +96,12 @@ public class OrderBusiness implements IOrderBusiness {
         } catch(NotFoundException ignored){
         }
         // TODO: validar el resto de entidades? falta tank
-        // TODO: falta poner fecha actual en la orden
         // Validate and findOrCreate related entities
         try {
             order.setDriver(driverBusiness.findOrCreate(order.getDriver()));
             order.setClient(clientBusiness.findOrCreate(order.getClient()));
+            Truck truck = order.getTruck();
+            List<Tank> tank = order.getTruck().getTanks();
             order.setTruck(truckBusiness.findOrCreate(order.getTruck()));
             order.setProduct(productBusiness.find(order.getProduct().getName()));
             order.setState(Order.State.RECEIVED);
@@ -123,8 +125,10 @@ public class OrderBusiness implements IOrderBusiness {
         Order order;
         try {
             order = mapper.readValue(json, Order.class);
+        } catch (OrderDeserializationException e){
+            log.error(e.getMessage());
+            throw new OrderDeserializationException(e.getMessage());
         } catch (Exception e) {
-            log.error(e.getMessage() + " este?");
             throw BusinessException.builder().ex(e).build();
         }
         return add(order);
