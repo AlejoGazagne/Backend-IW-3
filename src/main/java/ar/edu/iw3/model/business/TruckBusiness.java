@@ -1,15 +1,22 @@
 package ar.edu.iw3.model.business;
 
+import ar.edu.iw3.model.Tank;
 import ar.edu.iw3.model.Truck;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.interfaces.ITankBusiness;
 import ar.edu.iw3.model.business.interfaces.ITruckBusiness;
+import ar.edu.iw3.model.persistence.TankRepository;
 import ar.edu.iw3.model.persistence.TruckRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,6 +24,9 @@ import java.util.Optional;
 public class TruckBusiness implements ITruckBusiness {
     @Autowired
     private TruckRepository truckDAO;
+
+    @Autowired
+    private ITankBusiness tankBusiness;
 
     @Override
     public Truck find(long id) throws NotFoundException, BusinessException {

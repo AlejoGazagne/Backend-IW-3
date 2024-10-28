@@ -3,6 +3,7 @@ package ar.edu.iw3.controllers;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.OrderDeserializationException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +59,8 @@ public class SAPRestController extends BaseRestController {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (FoundException e) {
             return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+        } catch (OrderDeserializationException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 }

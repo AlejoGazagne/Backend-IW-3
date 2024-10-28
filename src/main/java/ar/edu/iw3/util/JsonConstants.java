@@ -27,7 +27,7 @@ public class JsonConstants {
     public static final String[] PRODUCT_NAME = {"name", "product_name"};
     public static final String[] PRODUCT_DESCRIPTION = {"description", "product_description"};
 
-    public static final String[] TANK = {"tank", "Tank"};
+    public static final String[] TANK = {"tank", "Tank", "tanks", "Tanks"};
     public static final String[] TANK_ID = {"id", "tank_id"};
     public static final String[] TANK_CAPACITY = {"capacity", "tank_capacity"};
     public static final String[] TANK_TRUCK = {"truck", "tank_truck"};

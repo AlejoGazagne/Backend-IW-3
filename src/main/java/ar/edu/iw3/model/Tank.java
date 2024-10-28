@@ -21,7 +21,7 @@ public class Tank {
     private long capacity;
 
     @ManyToOne
-    @JoinColumn(name = "id_truck")
+    @JoinColumn(name = "id_truck", nullable = false)
     private Truck truck;
 
     @Override
@@ -29,7 +29,7 @@ public class Tank {
         return "Tank{" +
                 "id=" + id +
                 ", capacity=" + capacity +
-                ", truck=" + (truck != null ? truck.getId() : null) +
+                //", truck=" + (truck != null ? truck.getId() : null) +
                 '}';
     }
 }

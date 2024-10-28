@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,14 +42,16 @@ public class TankBusiness implements ITankBusiness {
 //    }
 
     @Override
-    public Tank add(Tank tank) throws BusinessException, FoundException {
+    public List<Tank> add(List<Tank> tanks) throws BusinessException, FoundException {
         try {
-            find(tank.getId());
-            throw FoundException.builder().message("Tank exist, id = " + tank.getId()).build();
+            for (Tank t : tanks){
+                find(t.getId());
+                throw FoundException.builder().message("Tank exist, id = " + t.getId()).build();
+            }
         } catch (NotFoundException ignored){
         }
         try {
-            return tankDAO.save(tank);
+            return tankDAO.saveAll(tanks);
         } catch (Exception e){
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
