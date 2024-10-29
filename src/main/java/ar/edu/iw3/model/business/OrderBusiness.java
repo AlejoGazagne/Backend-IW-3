@@ -12,18 +12,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static ar.edu.iw3.util.RandomNumberGenerator.generateFourDigitRandom;
 
 @Service
 @Slf4j
 public class OrderBusiness implements IOrderBusiness {
     @Autowired
     private OrderRepository orderDAO;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Override
     public Order find(long id) throws NotFoundException, BusinessException {
@@ -95,7 +101,6 @@ public class OrderBusiness implements IOrderBusiness {
             throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
-        // TODO: validar el resto de entidades? falta tank
         // Validate and findOrCreate related entities
         try {
             order.setDriver(driverBusiness.findOrCreate(order.getDriver()));
@@ -148,8 +153,45 @@ public class OrderBusiness implements IOrderBusiness {
         }
 
         try {
+            Integer pass;
+            int attempts = 0;
+            boolean isUnique;
+            do {
+                pass = generateFourDigitRandom();
+                isUnique = !orderDAO.existsByPassword(pass);
+                attempts++;
+                if (attempts >= 10) {
+                    throw BusinessException.builder().message("Error al generar password unica.").build();
+                }
+            } while (!isUnique);
+            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
+            order.setDateFirstWeighing(date);
+            order.setPassword(pass);
             order.setTare(tare);
             order.setState(Order.State.FIRST_WEIGHING);
+            orderDAO.save(order);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    public void finalWeighing(long id, float finalWeight) throws NotFoundException, BusinessException, StateException {
+        Order order;
+        try {
+            order = find(id);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+        if (order.getState() != Order.State.CHARGED) {
+            throw StateException.builder().message("This order is not compatible with this operation.").build();
+        }
+        try {
+            order.setFinalWeight(finalWeight);
+            order.setState(Order.State.FINAL_WEIGHING);
+            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
+            order.setDateFinalWeighing(date);
             orderDAO.save(order);
         } catch (Exception e){
             log.error(e.getMessage());
