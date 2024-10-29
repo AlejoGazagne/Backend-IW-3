@@ -20,7 +20,7 @@ public class Order {
         RECEIVED,
         FIRST_WEIGHING,
         CHARGED,
-        SECOND_WEIGHING,
+        FINAL_WEIGHING,
     }
 
     @Id
@@ -60,7 +60,7 @@ public class Order {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date dateSecondWeighing;
+    private Date dateFinalWeighing;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
@@ -117,7 +117,7 @@ public class Order {
                 ", dateFirstWeighing=" + dateFirstWeighing +
                 ", dateInitialCharge=" + dateInitialCharge +
                 ", dateFinalCharge=" + dateFinalCharge +
-                ", dateSecondWeighing=" + dateSecondWeighing +
+                ", dateSecondWeighing=" + dateFinalWeighing +
                 ", expectedChargeDate=" + expectedChargeDate +
                 ", finalChargeWeight=" + finalChargeWeight +
                 ", lastMass=" + lastMass +

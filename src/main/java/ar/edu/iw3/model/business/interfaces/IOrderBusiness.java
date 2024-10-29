@@ -23,4 +23,5 @@ public interface IOrderBusiness {
 
     public Order addExternal(String json) throws BusinessException, FoundException;
 
+    public void finalWeighing(long orderId, float finalWeight) throws NotFoundException, BusinessException, StateException;
 }
