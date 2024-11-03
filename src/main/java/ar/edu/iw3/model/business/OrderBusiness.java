@@ -1,5 +1,6 @@
 package ar.edu.iw3.model.business;
 
+import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.Tank;
 import ar.edu.iw3.model.Truck;
@@ -16,12 +17,14 @@ import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
-import static ar.edu.iw3.util.RandomNumberGenerator.generateFourDigitRandom;
+import static ar.edu.iw3.util.RandomNumberGenerator.generateFiveDigitRandom;
 
 @Service
 @Slf4j
@@ -30,6 +33,10 @@ public class OrderBusiness implements IOrderBusiness {
     private OrderRepository orderDAO;
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private LoadDataBusiness loadDataBusiness;
+
 
     @Override
     public Order find(long id) throws NotFoundException, BusinessException {
@@ -96,7 +103,9 @@ public class OrderBusiness implements IOrderBusiness {
 
     @Override
     public Order add(Order order) throws FoundException, BusinessException {
+        Random passwordRandomizer = new Random();
         try {
+            
             find(order.getId());
             throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
@@ -157,7 +166,7 @@ public class OrderBusiness implements IOrderBusiness {
             int attempts = 0;
             boolean isUnique;
             do {
-                pass = generateFourDigitRandom();
+                pass = generateFiveDigitRandom();
                 isUnique = !orderDAO.existsByPassword(pass);
                 attempts++;
                 if (attempts >= 10) {
@@ -198,4 +207,77 @@ public class OrderBusiness implements IOrderBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    public Order validatePassword(long id, Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
+        Order order; 
+        try {
+            order = find(id);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+        if (order.getState() != Order.State.FIRST_WEIGHING){
+            throw StateException.builder().message("Cannot validate password on this order.").build();
+        }
+
+        if(password.equals(order.getPassword()) ){
+            return order;
+        }else{
+            throw PasswordException.builder().message("Incorrect password.").build();
+        }
+    }
+
+    public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
+        Order order = find(loadData.getOrder().getId());
+
+        if (order.getState() != Order.State.FIRST_WEIGHING) {
+            throw StateException.builder().message("This order is not compatible with this operation.").build();
+        }
+        if(loadData.getCaudal()<0){
+            throw TruckloadException.builder().message("Error: no flow.").build();
+        }
+        if(loadData.getAccumulatedMass() < order.getLastMass()){
+            throw TruckloadException.builder().message("Error: amount of liquid mass is invalid.").build();
+        }
+        
+        /*if(loadData.getTemperature() > order.getProduct().getLimitTemperature()){
+            HACER LOGICA DE ALARMA
+        }*/
+
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        if(order.getDateInitialCharge() == null){
+            order.setDateInitialCharge(currentTime);
+        }
+        System.out.println("orden???");
+        System.out.println(loadData.getAccumulatedMass());
+        System.out.println(loadData.getDensity());
+        if(order.getLastMass() >= order.getPreset()){
+            order.setDateFinalCharge(currentTime);
+            orderDAO.save(order);
+            return order;
+        }
+        order.setLastTimestamp(currentTime);
+        order.setLastMass((loadData.getAccumulatedMass()));
+        order.setLastDensity(loadData.getDensity());
+        order.setLastCaudal(loadData.getCaudal());
+        order.setLastTemperature(loadData.getTemperature());
+
+        order = loadDataBusiness.createLoadData(currentTime, loadData, order);
+        
+        orderDAO.save(order);
+
+        return order;
+
+    }
+
+    public Order finishTruckLoading(long id) throws BusinessException, NotFoundException, StateException {
+        Order order = find(id);
+        if (order.getState() != Order.State.FIRST_WEIGHING) {
+            throw StateException.builder().message("This order is not compatible with the closing operation.").build();
+        }
+        order.setState(Order.State.CHARGED);
+        orderDAO.save(order);
+        return order;
+    }
+
 }

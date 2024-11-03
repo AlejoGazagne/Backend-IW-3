@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 public class Order {
+    
     public enum State{
         RECEIVED,
         FIRST_WEIGHING,
@@ -38,7 +39,7 @@ public class Order {
 
     @Column()
     private float finalWeight;
-
+    
     @Column(nullable = false)
     private State state;
 

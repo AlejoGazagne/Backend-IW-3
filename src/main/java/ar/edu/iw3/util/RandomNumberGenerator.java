@@ -6,9 +6,9 @@ public class RandomNumberGenerator {
 
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    public static Integer generateFourDigitRandom() {
-        int min = 1000;
-        int max = 9999;
+    public static Integer generateFiveDigitRandom() {
+        int min = 10000;
+        int max = 99999;
         return secureRandom.nextInt((max - min) + 1) + min;
     }
 }

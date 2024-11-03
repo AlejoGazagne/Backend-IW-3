@@ -1,6 +1,7 @@
 package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.LoadData;
+import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
@@ -8,8 +9,11 @@ import ar.edu.iw3.model.business.interfaces.ILoadDataBusiness;
 import ar.edu.iw3.model.persistence.LoadDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,4 +63,40 @@ public class LoadDataBusiness implements ILoadDataBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Autowired
+    SimpMessagingTemplate truckLoadws;
+
+
+    public Order createLoadData(Timestamp currentTime, LoadData loadData, Order order) throws FoundException, BusinessException, NotFoundException{
+        
+        Optional<List<LoadData>> loadDataList = loadDataDAO.findByOrderId(loadData.getOrder().getId());
+
+        if (loadDataList.isPresent() && !loadDataList.get().isEmpty()){
+            Date dateFinalCharge = order.getDateFinalCharge();
+            if (checkFrequency(currentTime, dateFinalCharge)){
+                loadData.setTimestampLoad(currentTime);
+                add(loadData);
+                order.setDateFinalCharge(currentTime);
+
+                truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+            }
+            
+        }else{
+            loadData.setTimestampLoad(currentTime);
+            add(loadData);
+            order.setDateFinalCharge(currentTime);
+            truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+        }
+
+        return order;
+    }
+
+    private static final long FREQUENCY_MS = 5000;
+
+    private boolean checkFrequency(Timestamp currentTime, Date lastFinalCharge){
+        return currentTime.getTime() - lastFinalCharge.getTime() >= FREQUENCY_MS ;
+
+    }
+    
 }
