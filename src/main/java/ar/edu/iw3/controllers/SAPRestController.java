@@ -5,17 +5,22 @@ import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.OrderDeserializationException;
+import ar.edu.iw3.model.business.exceptions.PasswordException;
+import ar.edu.iw3.model.business.exceptions.StateException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+//import ar.edu.iw3.websocket.RealTimeLoadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +34,9 @@ public class SAPRestController extends BaseRestController {
 
     @Autowired
     private IOrderBusiness orderBusiness;
+
+    /*@Autowired
+    private RealTimeLoadService realTimeLoad;;*/
 
 //    @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
 //    @Parameter(in = ParameterIn.QUERY, name = "order", description = "Orden de carga", required = true)
@@ -66,4 +74,25 @@ public class SAPRestController extends BaseRestController {
             return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
         }
     }
+
+
+    /*@PostMapping("/order/start-loading/{orderId}")
+    public ResponseEntity<?> startLoading(@PathVariable long orderId, @RequestBody Integer password) {
+        try {
+            realTimeLoad.startLoading(orderId, password);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location", Constants.URL_SAP + "/order/start-loading/" + orderId);
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+        } catch (StateException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PasswordException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.UNAUTHORIZED, e, e.getMessage()), HttpStatus.UNAUTHORIZED);
+        }
+    }*/
+
+
 }
