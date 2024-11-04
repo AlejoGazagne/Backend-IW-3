@@ -26,4 +26,7 @@ public interface ILoadDataBusiness {
     public Double avgDensity(long orderId) throws BusinessException, NotFoundException;
 
     public Double avgCaudal(long orderId) throws BusinessException, NotFoundException;
+
+    public Order createLoadData(Timestamp currentTime, LoadData loadData, Order order) throws FoundException, BusinessException, NotFoundException;
+
 }
