@@ -1,8 +1,13 @@
 package ar.edu.iw3.controllers;
 
+import ar.edu.iw3.model.LoadData;
+import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
+import ar.edu.iw3.model.business.exceptions.PasswordException;
 import ar.edu.iw3.model.business.exceptions.StateException;
+import ar.edu.iw3.model.business.exceptions.TruckloadException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +51,10 @@ public class WeighingRestController extends BaseRestController {
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getCause().getMessage()), HttpStatus.INTERNAL_SERVER_ERROR); // todo: por que tengo que acceder así?
-        } catch (NotFoundException | StateException e) {
-            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (StateException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -63,8 +70,62 @@ public class WeighingRestController extends BaseRestController {
             return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (StateException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/load-truck/begin/{orderId}")
+    public ResponseEntity<?> loadTruck(@PathVariable long orderId, @RequestBody LoadData loadData) {
+        try {
+            orderBusiness.beginTruckLoading(orderId, loadData);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/" + orderId);
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NotFoundException | StateException e) {
-            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (TruckloadException e){
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (FoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PostMapping("/load-truck/validate-password/{orderId}")
+    public ResponseEntity<?> validatePassword(@PathVariable long orderId, @RequestParam Integer password) {
+        try {
+            Order order = orderBusiness.validatePassword(orderId, password);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/validate-password");
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (StateException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (PasswordException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.UNAUTHORIZED, e, e.getMessage()), HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/load-truck/finish/{orderId}")
+    public ResponseEntity<?> finishTruckLoading(@PathVariable long orderId) {
+        try {
+            orderBusiness.finishTruckLoading(orderId);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/finish/" + orderId);
+            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (StateException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
