@@ -46,8 +46,8 @@ public class RealTimeLoadService {
             return;
         }
         loadingInProgress = true;
-        while (order.getLastMass() < order.getPreset()) {
-            order.setLastMass(order.getLastMass() + random.nextFloat());
+        while (order.getLastAccumulatedMass() < order.getPreset()) {
+            order.setLastAccumulatedMass(order.getLastAccumulatedMass() + random.nextFloat());
             order.setLastDensity(order.getLastDensity() + random.nextFloat());
             order.setLastCaudal(order.getLastCaudal() + random.nextFloat());
             order.setLastTemperature(order.getLastTemperature() + random.nextFloat());

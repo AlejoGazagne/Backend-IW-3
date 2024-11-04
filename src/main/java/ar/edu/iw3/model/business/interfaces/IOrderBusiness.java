@@ -7,11 +7,13 @@ import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.StateException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public interface IOrderBusiness {
     public Order find(long id) throws NotFoundException, BusinessException;
 
-    public Order add(Order order) throws FoundException, BusinessException;
+    public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
 
     public List<Order> list() throws BusinessException;
 
@@ -21,7 +23,11 @@ public interface IOrderBusiness {
 
     public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException;
 
-    public Order addExternal(String json) throws BusinessException, FoundException;
+    public Order addExternal(String json) throws BusinessException, FoundException, NotFoundException;
 
-    public void finalWeighing(long orderId, float finalWeight) throws NotFoundException, BusinessException, StateException;
+    public Map<String, Object> finalWeighing(long orderId, float finalWeight) throws NotFoundException, BusinessException, StateException;
+
+    public Map<String, Object> conciliationJson(Order order) throws NotFoundException, BusinessException, StateException;
+
+    public byte[] conciliationPdf(long orderId) throws NotFoundException, BusinessException, StateException;
 }

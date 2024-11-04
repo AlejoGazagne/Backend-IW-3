@@ -70,7 +70,7 @@ public class Order {
     private float finalChargeWeight;
 
     @Column()
-    private float lastMass;
+    private float lastAccumulatedMass;
 
     @Column()
     private float lastDensity;
@@ -120,7 +120,7 @@ public class Order {
                 ", dateSecondWeighing=" + dateFinalWeighing +
                 ", expectedChargeDate=" + expectedChargeDate +
                 ", finalChargeWeight=" + finalChargeWeight +
-                ", lastMass=" + lastMass +
+                ", lastMass=" + lastAccumulatedMass +
                 ", lastDensity=" + lastDensity +
                 ", lastTemperature=" + lastTemperature +
                 ", lastCaudal=" + lastCaudal +

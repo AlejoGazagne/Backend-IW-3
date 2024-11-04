@@ -2,6 +2,19 @@ package ar.edu.iw3.model.persistence;
 
 import ar.edu.iw3.model.LoadData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface LoadDataRepository extends JpaRepository<LoadData, Long> {
+    @Query("SELECT AVG(l.temperature) FROM LoadData l WHERE l.order.id = :orderId")
+    Double avgTemperature(long orderId);
+
+    @Query("SELECT AVG(l.density) FROM LoadData l WHERE l.order.id = :orderId")
+    Double avgDensity(long orderId);
+
+    @Query("SELECT AVG(l.caudal) FROM LoadData l WHERE l.order.id = :orderId")
+    Double avgCaudal(long orderId);
+
+    List<LoadData> findByOrderId(long orderId);
 }

@@ -12,16 +12,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping(Constants.URL_WEIGHING)
 @Tag(description = "API del servicio de pesaje", name = "Weighing")
-public class WeighingController extends BaseRestController {
+public class WeighingRestController extends BaseRestController {
     @Autowired
     private IStandartResponseBusiness response;
 
@@ -56,10 +57,10 @@ public class WeighingController extends BaseRestController {
     @PostMapping("/final/{orderId}")
     public ResponseEntity<?> finalWeighing(@PathVariable long orderId, @RequestParam float finalWeight) {
         try {
-            orderBusiness.finalWeighing(orderId, finalWeight);
+            Map<String, Object> response = orderBusiness.finalWeighing(orderId, finalWeight);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_WEIGHING + "/final/" + orderId);
-            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+            return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NotFoundException | StateException e) {

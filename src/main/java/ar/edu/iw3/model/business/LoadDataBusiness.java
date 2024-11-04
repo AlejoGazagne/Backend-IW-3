@@ -59,4 +59,32 @@ public class LoadDataBusiness implements ILoadDataBusiness {
             throw BusinessException.builder().ex(e).build();
         }
     }
+
+    @Override
+    public List<LoadData> list(long orderId) throws BusinessException {
+        try {
+            return loadDataDAO.findByOrderId(orderId);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Double avgTemperature(long orderId) throws BusinessException, NotFoundException {
+        LoadData loadData = find(orderId);
+        return loadDataDAO.avgTemperature(orderId);
+    }
+
+    @Override
+    public Double avgDensity(long orderId) throws BusinessException, NotFoundException {
+        LoadData loadData = find(orderId);
+        return loadDataDAO.avgDensity(orderId);
+    }
+
+    @Override
+    public Double avgCaudal(long orderId) throws BusinessException, NotFoundException {
+        LoadData loadData = find(orderId);
+        return loadDataDAO.avgCaudal(orderId);
+    }
 }

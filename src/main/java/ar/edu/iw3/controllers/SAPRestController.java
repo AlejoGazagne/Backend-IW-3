@@ -3,6 +3,7 @@ package ar.edu.iw3.controllers;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
+import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.OrderDeserializationException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
@@ -45,7 +46,6 @@ public class SAPRestController extends BaseRestController {
 //        }
 //    }
 
-    // todo: como se documenta este endpoint?
     // todo: si el producto no existe devuelve solamente 500 el mensaje no tiene nada
     @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
     @Parameter(in = ParameterIn.DEFAULT, name = "order", description = "Orden de carga", required = true)
@@ -62,6 +62,8 @@ public class SAPRestController extends BaseRestController {
             return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
         } catch (OrderDeserializationException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
         }
     }
 }

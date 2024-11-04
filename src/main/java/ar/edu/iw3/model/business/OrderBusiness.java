@@ -8,18 +8,14 @@ import ar.edu.iw3.model.business.interfaces.*;
 import ar.edu.iw3.model.deserializers.OrderJsonDeserializer;
 import ar.edu.iw3.model.persistence.OrderRepository;
 import ar.edu.iw3.util.JsonUtiles;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import ar.edu.iw3.util.PdfService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static ar.edu.iw3.util.RandomNumberGenerator.generateFourDigitRandom;
 
@@ -28,8 +24,6 @@ import static ar.edu.iw3.util.RandomNumberGenerator.generateFourDigitRandom;
 public class OrderBusiness implements IOrderBusiness {
     @Autowired
     private OrderRepository orderDAO;
-    @Autowired
-    private OrderRepository orderRepository;
 
     @Override
     public Order find(long id) throws NotFoundException, BusinessException {
@@ -95,7 +89,7 @@ public class OrderBusiness implements IOrderBusiness {
     private IProductBusiness productBusiness;
 
     @Override
-    public Order add(Order order) throws FoundException, BusinessException {
+    public Order add(Order order) throws FoundException, BusinessException, NotFoundException {
         try {
             find(order.getId());
             throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
@@ -111,9 +105,12 @@ public class OrderBusiness implements IOrderBusiness {
             order.setProduct(productBusiness.find(order.getProduct().getName()));
             order.setState(Order.State.RECEIVED);
             order.setDateReceived(JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())));
-        } catch (Exception e) {
+        } catch (BusinessException e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
+        } catch (NotFoundException e) {
+            log.error(e.getMessage(), e);
+            throw NotFoundException.builder().message("Error al buscar o crear entidades relacionadas.").ex(e).build(); //todo: ver si se puede mejorar el mensaje
         }
 
         try {
@@ -125,7 +122,7 @@ public class OrderBusiness implements IOrderBusiness {
     }
 
     @Override
-    public Order addExternal(String json) throws BusinessException, FoundException {
+    public Order addExternal(String json) throws BusinessException, FoundException, NotFoundException {
         ObjectMapper mapper = JsonUtiles.getObjectMapper(Order.class, new OrderJsonDeserializer(Order.class, clientBusiness, driverBusiness, truckBusiness, productBusiness, tankBusiness), null);
         Order order;
         try {
@@ -139,6 +136,7 @@ public class OrderBusiness implements IOrderBusiness {
         return add(order);
     }
 
+    @Override
     public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException {
         Order order;
         try {
@@ -176,7 +174,8 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public void finalWeighing(long id, float finalWeight) throws NotFoundException, BusinessException, StateException {
+    @Override
+    public Map<String, Object> finalWeighing(long id, float finalWeight) throws NotFoundException, BusinessException, StateException {
         Order order;
         try {
             order = find(id);
@@ -193,6 +192,59 @@ public class OrderBusiness implements IOrderBusiness {
             Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
             order.setDateFinalWeighing(date);
             orderDAO.save(order);
+            return conciliationJson(order);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Autowired
+    private ILoadDataBusiness loadDataBusiness;
+
+    @Override
+    public Map<String, Object> conciliationJson(Order order) throws NotFoundException, BusinessException, StateException {
+        Map<String, Object> conciliation = new HashMap<>();
+
+        if (order.getState() != Order.State.FINAL_WEIGHING) {
+            throw StateException.builder().message("This order is not compatible with this operation.").build();
+        }
+
+        float initialWeight = order.getTare();
+        float finalWeight = order.getFinalWeight();
+        float finalAccumulatedMass = order.getLastAccumulatedMass();
+        float netWeight = finalWeight - initialWeight;
+        float differenceWeight = netWeight - finalAccumulatedMass;
+        //String productName = order.getProduct().getName();
+        //float avgTemperature = loadDataBusiness.avgTemperature(orderId);
+        //float avgDensity = loadDataBusiness.avgDensity(orderId);
+        //float avgCaudal = loadDataBusiness.avgCaudal(orderId);
+
+        conciliation.put("initialWeight", initialWeight);
+        conciliation.put("finalWeight", finalWeight);
+        conciliation.put("productName", order.getProduct().getName());
+        conciliation.put("finalAccumulatedMass", finalAccumulatedMass);
+        conciliation.put("netWeight", netWeight);
+        conciliation.put("differenceWeight", differenceWeight);
+        conciliation.put("avgTemperature", loadDataBusiness.avgTemperature(order.getId()));
+        conciliation.put("avgDensity", loadDataBusiness.avgDensity(order.getId()));
+        conciliation.put("avgCaudal", loadDataBusiness.avgCaudal(order.getId()));
+
+        return conciliation;
+    }
+
+    @Autowired
+    private PdfService pdfService;
+
+    @Override
+    public byte[] conciliationPdf(long orderId) throws NotFoundException, BusinessException, StateException {
+        Order order = find(orderId);
+        if (order.getState() != Order.State.FINAL_WEIGHING) {
+            throw StateException.builder().message("This order is not compatible with this operation.").build();
+        }
+
+        try {
+            return pdfService.conciliationPDF(order);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();

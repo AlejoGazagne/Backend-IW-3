@@ -13,4 +13,12 @@ public interface ILoadDataBusiness {
     public LoadData add(LoadData loadData) throws FoundException, BusinessException;
 
     public List<LoadData> list() throws BusinessException;
+
+    public List<LoadData> list(long orderId) throws BusinessException;
+
+    public Double avgTemperature(long orderId) throws BusinessException, NotFoundException;
+
+    public Double avgDensity(long orderId) throws BusinessException, NotFoundException;
+
+    public Double avgCaudal(long orderId) throws BusinessException, NotFoundException;
 }

@@ -35,7 +35,7 @@ public class LoadData {
     @Column(nullable = false)
     private Date timestampLoad;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_order", nullable = false)
     private Order order;
 }
