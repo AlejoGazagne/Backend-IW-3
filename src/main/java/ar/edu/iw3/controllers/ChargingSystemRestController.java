@@ -27,12 +27,16 @@ public class ChargingSystemRestController {
     @Autowired
     private IOrderBusiness orderBusiness;
 
-    @Operation(operationId = "ValidarPassword", summary = "Validar la contraseña de la orden")
+    @Operation(operationId = "ValidarOrden", summary = "Validar la contraseña de la orden")
     @Parameter(in = ParameterIn.QUERY, name = "password", description = "Contraseña de la orden", required = true)
     @ApiResponses(value = {
-
+            @ApiResponse(responseCode = "200", description = "Orden validada"),
+            @ApiResponse(responseCode = "400", description = "Orden no encontrada"),
+            @ApiResponse(responseCode = "401", description = "Contraseña incorrecta"),// todo: mmmmm
+            @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/")
+    @PostMapping("/validate-password")
     public ResponseEntity<?> validatePassword(@PathVariable long orderId, @RequestParam Integer password) {
         try {
             Order order = orderBusiness.validatePassword(orderId, password);
@@ -44,7 +48,7 @@ public class ChargingSystemRestController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (StateException e) {
-            return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT);
         } catch (PasswordException e) {
             return new ResponseEntity<>(response.build(HttpStatus.UNAUTHORIZED, e, e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
