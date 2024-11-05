@@ -11,7 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface LoadDataRepository extends JpaRepository<LoadData, Long> {
-        public Optional<List<LoadData>> findByOrderId(long id);
+
+    public Optional<List<LoadData>> findByOrderId(long id);
 
     @Query("SELECT AVG(l.temperature) FROM LoadData l WHERE l.order.id = :orderId")
     Double avgTemperature(long orderId);

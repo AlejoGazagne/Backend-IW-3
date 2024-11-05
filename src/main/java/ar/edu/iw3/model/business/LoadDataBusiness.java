@@ -66,8 +66,14 @@ public class LoadDataBusiness implements ILoadDataBusiness {
 
     @Override
     public List<LoadData> list(long orderId) throws BusinessException {
+        Optional<List<LoadData>> loadDatas;
         try {
-            return loadDataDAO.findByOrderId(orderId);
+            loadDatas = loadDataDAO.findByOrderId(orderId);
+
+            if(loadDatas.isEmpty()) {
+                throw NotFoundException.builder().message("LoadData not found, id = " + orderId).build();
+            }
+            return loadDatas.get();
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();

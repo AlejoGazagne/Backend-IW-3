@@ -1,11 +1,15 @@
 package ar.edu.iw3.controllers;
 
-import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.StateException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +28,14 @@ public class ConciliationRestController extends BaseRestController {
     @Autowired
     private IOrderBusiness orderBusiness;
 
+    @Operation(operationId = "conciliation", summary = "Genera un archivo PDF con la conciliación de la orden")
+    @Parameter(in = ParameterIn.PATH, name = "orderId", description = "Id de la orden", required = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conciliación generada exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Orden no encontrada"),
+            @ApiResponse(responseCode = "409", description = "La orden no se encuentra en estado de conciliación"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     @GetMapping("/order/{orderId}")
     public ResponseEntity<byte[]> conciliation(@PathVariable long orderId){
         try {
@@ -40,7 +52,7 @@ public class ConciliationRestController extends BaseRestController {
             return new ResponseEntity<>(errorMessage.getBytes(), HttpStatus.NOT_FOUND);
         } catch (StateException e) {
             String errorMessage = e.getMessage();
-            return new ResponseEntity<>(errorMessage.getBytes(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorMessage.getBytes(), HttpStatus.CONFLICT);
         }
     }
 }
