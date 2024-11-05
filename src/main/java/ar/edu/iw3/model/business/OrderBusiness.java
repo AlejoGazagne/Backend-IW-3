@@ -256,10 +256,10 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public Order validatePassword(long id, Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
+    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
         Order order;
         try {
-            order = find(id);
+            order = orderDAO.findByPassword(password);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
