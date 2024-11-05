@@ -53,24 +53,6 @@ public class PdfService {
 
         // Tabla para datos de carga (LoadData)
         addLoadDataSection(document, order, dateFormat);
-//        if (order.getLoadData() != null && !order.getLoadData().isEmpty()) {
-//            document.add(new Paragraph(" "));
-//            document.add(new Paragraph("Datos de carga: "));
-//            document.add(new Paragraph("Fecha: " + order.getDateInitialCharge()));
-//            document.add(new Paragraph(" "));
-//            PdfPTable table = new PdfPTable(3); // Ajustar según columnas necesarias
-//            table.setWidthPercentage(100);
-//            //table.addCell("Masa acumulada");
-//            table.addCell("Densidad promedio");
-//            table.addCell("Temperatura promedio");
-//            table.addCell("Caudal promedio");
-//
-//            table.addCell(String.valueOf(loadDataDAO.avgDensity(order.getId())));
-//            table.addCell(String.valueOf(loadDataDAO.avgTemperature(order.getId())));
-//            table.addCell(String.valueOf(loadDataDAO.avgCaudal(order.getId())));
-//
-//            document.add(table);
-//        }
 
         // Cerrar documento
         document.close();

@@ -1,5 +1,6 @@
 package ar.edu.iw3.model.business;
 
+import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.Tank;
 import ar.edu.iw3.model.Truck;
@@ -16,11 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import static ar.edu.iw3.util.RandomNumberGenerator.generateFiveDigitRandom;
 
@@ -31,7 +31,7 @@ public class OrderBusiness implements IOrderBusiness {
     private OrderRepository orderDAO;
 
     @Autowired
-    private LoadDataBusiness loadDataBusiness;
+    private ILoadDataBusiness loadDataBusiness;
 
 
     @Override
@@ -98,8 +98,6 @@ public class OrderBusiness implements IOrderBusiness {
     private IProductBusiness productBusiness;
 
     @Override
-//    public Order add(Order order) throws FoundException, BusinessException {
-//        Random passwordRandomizer = new Random();
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException {
         try {
 
@@ -149,7 +147,7 @@ public class OrderBusiness implements IOrderBusiness {
     }
 
     @Override
-    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException {
+    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException, PasswordException {
         Order order;
         try {
             order = find(id);
@@ -171,7 +169,7 @@ public class OrderBusiness implements IOrderBusiness {
                 isUnique = !orderDAO.existsByPassword(pass);
                 attempts++;
                 if (attempts >= 10) {
-                    throw BusinessException.builder().message("Error al generar password unica.").build();
+                    throw PasswordException.builder().message("Error al generar password unica.").build();
                 }
             } while (!isUnique);
             Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
@@ -211,9 +209,6 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    @Autowired
-    private ILoadDataBusiness loadDataBusiness;
-
     @Override
     public Map<String, Object> conciliationJson(Order order) throws NotFoundException, BusinessException, StateException {
         Map<String, Object> conciliation = new HashMap<>();
@@ -227,10 +222,6 @@ public class OrderBusiness implements IOrderBusiness {
         float finalAccumulatedMass = order.getLastAccumulatedMass();
         float netWeight = finalWeight - initialWeight;
         float differenceWeight = netWeight - finalAccumulatedMass;
-        //String productName = order.getProduct().getName();
-        //float avgTemperature = loadDataBusiness.avgTemperature(orderId);
-        //float avgDensity = loadDataBusiness.avgDensity(orderId);
-        //float avgCaudal = loadDataBusiness.avgCaudal(orderId);
 
         conciliation.put("initialWeight", initialWeight);
         conciliation.put("finalWeight", finalWeight);
@@ -291,7 +282,7 @@ public class OrderBusiness implements IOrderBusiness {
         if(loadData.getCaudal()<0){
             throw TruckloadException.builder().message("Error: no flow.").build();
         }
-        if(loadData.getAccumulatedMass() < order.getLastMass()){
+        if(loadData.getAccumulatedMass() < order.getLastAccumulatedMass()){
             throw TruckloadException.builder().message("Error: amount of liquid mass is invalid.").build();
         }
 
@@ -303,16 +294,14 @@ public class OrderBusiness implements IOrderBusiness {
         if(order.getDateInitialCharge() == null){
             order.setDateInitialCharge(currentTime);
         }
-        System.out.println("orden???");
-        System.out.println(loadData.getAccumulatedMass());
-        System.out.println(loadData.getDensity());
-        if(order.getLastMass() >= order.getPreset()){
+
+        if(order.getLastAccumulatedMass() >= order.getPreset()){
             order.setDateFinalCharge(currentTime);
             orderDAO.save(order);
             return order;
         }
         order.setLastTimestamp(currentTime);
-        order.setLastMass((loadData.getAccumulatedMass()));
+        order.setLastAccumulatedMass((loadData.getAccumulatedMass()));
         order.setLastDensity(loadData.getDensity());
         order.setLastCaudal(loadData.getCaudal());
         order.setLastTemperature(loadData.getTemperature());
@@ -322,7 +311,6 @@ public class OrderBusiness implements IOrderBusiness {
         orderDAO.save(order);
 
         return order;
-
     }
 
     public Order finishTruckLoading(long id) throws BusinessException, NotFoundException, StateException {

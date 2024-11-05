@@ -24,7 +24,7 @@ public interface IOrderBusiness {
 
     public Order update(Order order) throws NotFoundException, BusinessException;
 
-    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException;
+    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException, PasswordException;
 
     public Order addExternal(String json) throws BusinessException, FoundException, NotFoundException;
 
@@ -33,7 +33,6 @@ public interface IOrderBusiness {
     public Map<String, Object> conciliationJson(Order order) throws NotFoundException, BusinessException, StateException;
 
     public byte[] conciliationPdf(long orderId) throws NotFoundException, BusinessException, StateException;
-    //public void finalWeighing(long orderId, float finalWeight) throws NotFoundException, BusinessException, StateException;
 
     public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 

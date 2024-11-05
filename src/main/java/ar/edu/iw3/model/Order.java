@@ -28,7 +28,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(length = 4, unique = true)
+    @Column(length = 5, unique = true)
     private Integer password;
 
     @Column(nullable = false)

@@ -7,6 +7,7 @@ public final class Constants {
 
 	public static final String URL_SAP = URL_BASE + "/sap";
 	public static final String URL_WEIGHING = URL_BASE + "/weighing";
+	public static final String URL_CHARGING_SYSTEM = URL_BASE + "/charging-system";
 	public static final String URL_CONCILIATION = URL_BASE + "/conciliation";
 
 	public static final String URL_LOGIN = URL_BASE + "/login";

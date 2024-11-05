@@ -16,6 +16,8 @@ public interface ILoadDataBusiness {
 
     public List<LoadData> list() throws BusinessException;
 
+    public Order createLoadData(Timestamp currentTime, LoadData loadData, Order order) throws FoundException, BusinessException, NotFoundException;
+
     public List<LoadData> list(long orderId) throws BusinessException;
 
     public Double avgTemperature(long orderId) throws BusinessException, NotFoundException;
@@ -23,7 +25,5 @@ public interface ILoadDataBusiness {
     public Double avgDensity(long orderId) throws BusinessException, NotFoundException;
 
     public Double avgCaudal(long orderId) throws BusinessException, NotFoundException;
-
-    public Order createLoadData(Timestamp currentTime, LoadData loadData, Order order) throws FoundException, BusinessException, NotFoundException;
 
 }
