@@ -1,13 +1,9 @@
 package ar.edu.iw3.controllers;
 
-import ar.edu.iw3.model.LoadData;
-import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
-import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.PasswordException;
 import ar.edu.iw3.model.business.exceptions.StateException;
-import ar.edu.iw3.model.business.exceptions.TruckloadException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +36,7 @@ public class WeighingRestController extends BaseRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Carga del pesaje, generación de password y cambio de estado exitosos"),
             @ApiResponse(responseCode = "404", description = "Orden no encontrada"),
+            @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación o no se pudo generar la password de la orden."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping("/first/{orderId}")
@@ -51,9 +48,9 @@ public class WeighingRestController extends BaseRestController {
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (NotFoundException | StateException e) {
+        } catch (NotFoundException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (PasswordException e) {
+        } catch (StateException | PasswordException e) {
             return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT);
         }
     }

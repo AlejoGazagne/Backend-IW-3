@@ -151,6 +151,8 @@ public class OrderBusiness implements IOrderBusiness {
         Order order;
         try {
             order = find(id);
+        } catch (NotFoundException e){
+            throw NotFoundException.builder().message("Order not found, id = " + id).build();
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
