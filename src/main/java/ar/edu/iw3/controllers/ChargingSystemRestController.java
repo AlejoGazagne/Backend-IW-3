@@ -37,9 +37,9 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping("/validate-password")
-    public ResponseEntity<?> validatePassword(@PathVariable long orderId, @RequestParam Integer password) {
+    public ResponseEntity<?> validatePassword(@RequestParam Integer password) {
         try {
-            Order order = orderBusiness.validatePassword(orderId, password);
+            Order order = orderBusiness.validatePassword(password);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/validate-password");
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);

@@ -36,7 +36,7 @@ public interface IOrderBusiness {
 
     public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 
-    public Order validatePassword(long orderId, Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
+    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
 
     public Order finishTruckLoading(long id) throws BusinessException, NotFoundException, StateException;
 }

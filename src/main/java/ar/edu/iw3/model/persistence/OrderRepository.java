@@ -15,4 +15,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = "SELECT * FROM Order WHERE Order.state = :state", nativeQuery = true)
     public List<Order> findByState(@Param("state") int state);
+
+    public Order findByPassword(Integer password);
 }
