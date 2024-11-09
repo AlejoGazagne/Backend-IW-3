@@ -17,9 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import java.util.*;
 
 import static ar.edu.iw3.util.RandomNumberGenerator.generateFiveDigitRandom;
@@ -310,7 +307,7 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public void beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
+    public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
         Order order = findById(id);
 
         if (order.getState() != Order.State.FIRST_WEIGHING) {
@@ -332,6 +329,13 @@ public class OrderBusiness implements IOrderBusiness {
             order.setDateInitialCharge(currentTime);
         }
 
+        if(order.getLastAccumulatedMass() >= order.getPreset()){
+            order.setDateFinalCharge(currentTime);
+            orderDAO.save(order);
+            return order;
+
+        }
+
         order.setLastTimestamp(currentTime);
         order.setLastAccumulatedMass(loadData.getAccumulatedMass());
         order.setLastDensity(loadData.getDensity());
@@ -341,6 +345,8 @@ public class OrderBusiness implements IOrderBusiness {
         order = loadDataBusiness.createLoadData(currentTime, loadData, order);
 
         orderDAO.save(order);
+        return order;
+
     }
 
     public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException {
