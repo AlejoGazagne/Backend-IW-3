@@ -5,6 +5,7 @@ import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -41,8 +42,8 @@ public class ChargingSystemRestController {
             String response = orderBusiness.validatePassword(password);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/validate-password");
-            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
-        } catch (BusinessException e) {
+            return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
+        } catch (BusinessException | JsonProcessingException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NotFoundException | PasswordException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
