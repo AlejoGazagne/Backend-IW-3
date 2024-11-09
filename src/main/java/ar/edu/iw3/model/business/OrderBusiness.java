@@ -2,15 +2,16 @@ package ar.edu.iw3.model.business;
 
 import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.Order;
-import ar.edu.iw3.model.Tank;
-import ar.edu.iw3.model.Truck;
 import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.*;
 import ar.edu.iw3.model.deserializers.OrderJsonDeserializer;
 import ar.edu.iw3.model.persistence.OrderRepository;
+import ar.edu.iw3.model.serializers.OrderJsonSerializer;
 import ar.edu.iw3.util.JsonUtiles;
 import ar.edu.iw3.util.PdfService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,8 +125,6 @@ public class OrderBusiness implements IOrderBusiness {
         try {
             order.setDriver(driverBusiness.findOrCreate(order.getDriver()));
             order.setClient(clientBusiness.findOrCreate(order.getClient()));
-            Truck truck = order.getTruck();
-            List<Tank> tank = order.getTruck().getTanks();
             order.setTruck(truckBusiness.findOrCreate(order.getTruck()));
             order.setProduct(productBusiness.find(order.getProduct().getName()));
             order.setState(Order.State.RECEIVED);
@@ -286,7 +285,7 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
+    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException, JsonProcessingException {
         Optional<Order> order;
         try {
             order = orderDAO.findByPassword(password);
@@ -303,8 +302,8 @@ public class OrderBusiness implements IOrderBusiness {
         }
 
         if(password.equals(order.get().getPassword())){
-            // todo: ingreso al serializador
-            return "";
+            StdSerializer<Order> serializer = new OrderJsonSerializer(Order.class);
+            return JsonUtiles.getObjectMapper(Order.class, serializer, null).writeValueAsString(order.get());
         }else{
             throw PasswordException.builder().message("Incorrect password.").build();
         }

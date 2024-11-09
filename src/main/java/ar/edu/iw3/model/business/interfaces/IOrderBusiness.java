@@ -8,6 +8,7 @@ import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.PasswordException;
 import ar.edu.iw3.model.business.exceptions.StateException;
 import ar.edu.iw3.model.business.exceptions.TruckloadException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public interface IOrderBusiness {
 
     public void beginTruckLoading(long orderId, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 
-    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
+    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException, JsonProcessingException;
 
     public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException;
 }
