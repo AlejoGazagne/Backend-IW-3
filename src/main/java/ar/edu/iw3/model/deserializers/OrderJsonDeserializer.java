@@ -45,7 +45,7 @@ public class OrderJsonDeserializer extends StdDeserializer<Order> {
 
         try {
             // Obtener valores del nodo
-            long idOrder = JsonUtiles.getLong(node, ORDER_NUMBER, 0);
+            String externalId = JsonUtiles.getString(node, ORDER_NUMBER, "");
             Date expectedChargeDate = JsonUtiles.getDate(node, EXPECTED_CHARGE_DATE, null);
             float preset = JsonUtiles.getFloat(node, PRESET, 0);
             Client client = JsonUtiles.getClient(node, CLIENT, Client.class);
@@ -55,7 +55,7 @@ public class OrderJsonDeserializer extends StdDeserializer<Order> {
             List<Tank> tanks = JsonUtiles.getTank(node, TANK, Tank.class);
 
             // Asignar valores a la orden
-            order.setId(idOrder);
+            order.setExternalId(externalId);
             order.setExpectedChargeDate(expectedChargeDate);
             order.setPreset(preset);
             order.setClient(client);
@@ -72,6 +72,8 @@ public class OrderJsonDeserializer extends StdDeserializer<Order> {
                 }
                 order.setTruck(truck);
             }
+            System.out.println(order.getTruck());
+            System.out.println(order.getTruck().getTanks());
 
         } catch (Exception e) {
             throw new OrderDeserializationException("Error al deserializar la orden: " + e.getMessage(), e);

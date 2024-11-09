@@ -35,7 +35,23 @@ public class OrderBusiness implements IOrderBusiness {
 
 
     @Override
-    public Order find(long id) throws NotFoundException, BusinessException {
+    public Order find(String externalId) throws NotFoundException, BusinessException {
+        Optional<Order> order;
+        try {
+            order = orderDAO.findByExternalId(externalId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(order.isEmpty()) {
+            throw NotFoundException.builder().message("Order not found, id = " + externalId).build();
+        }
+        return order.get();
+    }
+
+    @Override
+    public Order findById(long id) throws NotFoundException, BusinessException {
         Optional<Order> order;
         try {
             order = orderDAO.findById(id);
@@ -61,10 +77,10 @@ public class OrderBusiness implements IOrderBusiness {
     }
 
     @Override
-    public void delete(long id) throws NotFoundException, BusinessException {
-        find(id);
+    public void delete(String externalId) throws NotFoundException, BusinessException {
+        find(externalId);
         try {
-            orderDAO.deleteById(id);
+            orderDAO.deleteByExternalId(externalId);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
@@ -73,7 +89,7 @@ public class OrderBusiness implements IOrderBusiness {
 
     @Override
     public Order update(Order order) throws NotFoundException, BusinessException {
-        find(order.getId());
+        find(order.getExternalId());
         try {
             return orderDAO.save(order);
         } catch (Exception e){
@@ -100,8 +116,7 @@ public class OrderBusiness implements IOrderBusiness {
     @Override
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException {
         try {
-
-            find(order.getId());
+            find(order.getExternalId());
             throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
@@ -120,7 +135,7 @@ public class OrderBusiness implements IOrderBusiness {
             throw BusinessException.builder().ex(e).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
-            throw NotFoundException.builder().message("Error al buscar o crear entidades relacionadas.").ex(e).build(); //todo: ver si se puede mejorar el mensaje
+            throw NotFoundException.builder().message("Error al buscar o crear entidades relacionadas.").ex(e).build();
         }
 
         try {
@@ -147,12 +162,12 @@ public class OrderBusiness implements IOrderBusiness {
     }
 
     @Override
-    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException, PasswordException {
+    public void firstWeighing(String externalId, float tare) throws NotFoundException, BusinessException, StateException, PasswordException {
         Order order;
         try {
-            order = find(id);
+            order = find(externalId);
         } catch (NotFoundException e){
-            throw NotFoundException.builder().message("Order not found, id = " + id).build();
+            throw NotFoundException.builder().message("Order not found, id = " + externalId).build();
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
@@ -187,10 +202,10 @@ public class OrderBusiness implements IOrderBusiness {
     }
 
     @Override
-    public Map<String, Object> finalWeighing(long id, float finalWeight) throws NotFoundException, BusinessException, StateException {
+    public Map<String, Object> finalWeighing(String externalId, float finalWeight) throws NotFoundException, BusinessException, StateException {
         Order order;
         try {
-            order = find(id);
+            order = find(externalId);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
@@ -203,8 +218,12 @@ public class OrderBusiness implements IOrderBusiness {
             order.setState(Order.State.FINAL_WEIGHING);
             Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
             order.setDateFinalWeighing(date);
+            Map<String, Object> conciliation = conciliationJson(order);
             orderDAO.save(order);
-            return conciliationJson(order);
+            return conciliation;
+        } catch (NotFoundException e){
+            log.error(e.getMessage());
+            throw NotFoundException.builder().message("Load data not found").build();
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
@@ -219,31 +238,42 @@ public class OrderBusiness implements IOrderBusiness {
             throw StateException.builder().message("This order is not compatible with this operation.").build();
         }
 
-        float initialWeight = order.getTare();
-        float finalWeight = order.getFinalWeight();
-        float finalAccumulatedMass = order.getLastAccumulatedMass();
-        float netWeight = finalWeight - initialWeight;
-        float differenceWeight = netWeight - finalAccumulatedMass;
+        try {
+            List<LoadData> data = order.getLoadData();
+            if (data.isEmpty()) {
+                throw NotFoundException.builder().build();
+            }
+            float initialWeight = order.getTare();
+            float finalWeight = order.getFinalWeight();
+            float finalAccumulatedMass = order.getLastAccumulatedMass();
+            float netWeight = finalWeight - initialWeight;
+            float differenceWeight = netWeight - finalAccumulatedMass;
 
-        conciliation.put("initialWeight", initialWeight);
-        conciliation.put("finalWeight", finalWeight);
-        conciliation.put("productName", order.getProduct().getName());
-        conciliation.put("finalAccumulatedMass", finalAccumulatedMass);
-        conciliation.put("netWeight", netWeight);
-        conciliation.put("differenceWeight", differenceWeight);
-        conciliation.put("avgTemperature", loadDataBusiness.avgTemperature(order.getId()));
-        conciliation.put("avgDensity", loadDataBusiness.avgDensity(order.getId()));
-        conciliation.put("avgCaudal", loadDataBusiness.avgCaudal(order.getId()));
-
-        return conciliation;
+            conciliation.put("initialWeight", initialWeight);
+            conciliation.put("finalWeight", finalWeight);
+            conciliation.put("productName", order.getProduct().getName());
+            conciliation.put("finalAccumulatedMass", finalAccumulatedMass);
+            conciliation.put("netWeight", netWeight);
+            conciliation.put("differenceWeight", differenceWeight);
+            conciliation.put("avgTemperature", loadDataBusiness.avgTemperature(order.getId()));
+            conciliation.put("avgDensity", loadDataBusiness.avgDensity(order.getId()));
+            conciliation.put("avgCaudal", loadDataBusiness.avgCaudal(order.getId()));
+            return conciliation;
+        } catch(NotFoundException e){
+            log.error(e.getMessage());
+            throw NotFoundException.builder().ex(e).build();
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
     }
 
     @Autowired
     private PdfService pdfService;
 
     @Override
-    public byte[] conciliationPdf(long orderId) throws NotFoundException, BusinessException, StateException {
-        Order order = find(orderId);
+    public byte[] conciliationPdf(String externalId) throws NotFoundException, BusinessException, StateException {
+        Order order = find(externalId);
         if (order.getState() != Order.State.FINAL_WEIGHING) {
             throw StateException.builder().message("This order is not compatible with this operation.").build();
         }
@@ -256,27 +286,32 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
-        Order order;
+    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
+        Optional<Order> order;
         try {
             order = orderDAO.findByPassword(password);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
         }
-        if (order.getState() != Order.State.FIRST_WEIGHING){
-            throw StateException.builder().message("Cannot validate password on this order.").build();
+        if(order.isEmpty()) {
+            throw NotFoundException.builder().message("Order not found.").build();
         }
 
-        if(password.equals(order.getPassword()) ){
-            return order;
+        if (order.get().getState() != Order.State.FIRST_WEIGHING){
+            throw StateException.builder().message("This order is not compatible with this operation.").build();
+        }
+
+        if(password.equals(order.get().getPassword())){
+            // todo: ingreso al serializador
+            return "";
         }else{
             throw PasswordException.builder().message("Incorrect password.").build();
         }
     }
 
-    public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
-        Order order = find(loadData.getOrder().getId());
+    public void beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
+        Order order = findById(id);
 
         if (order.getState() != Order.State.FIRST_WEIGHING) {
             throw StateException.builder().message("This order is not compatible with this operation.").build();
@@ -297,13 +332,8 @@ public class OrderBusiness implements IOrderBusiness {
             order.setDateInitialCharge(currentTime);
         }
 
-        if(order.getLastAccumulatedMass() >= order.getPreset()){
-            order.setDateFinalCharge(currentTime);
-            orderDAO.save(order);
-            return order;
-        }
         order.setLastTimestamp(currentTime);
-        order.setLastAccumulatedMass((loadData.getAccumulatedMass()));
+        order.setLastAccumulatedMass(loadData.getAccumulatedMass());
         order.setLastDensity(loadData.getDensity());
         order.setLastCaudal(loadData.getCaudal());
         order.setLastTemperature(loadData.getTemperature());
@@ -311,18 +341,17 @@ public class OrderBusiness implements IOrderBusiness {
         order = loadDataBusiness.createLoadData(currentTime, loadData, order);
 
         orderDAO.save(order);
-
-        return order;
     }
 
-    public Order finishTruckLoading(long id) throws BusinessException, NotFoundException, StateException {
-        Order order = find(id);
+    public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException {
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        Order order = find(externalId);
+        order.setDateFinalCharge(currentTime);
         if (order.getState() != Order.State.FIRST_WEIGHING) {
             throw StateException.builder().message("This order is not compatible with the closing operation.").build();
         }
         order.setState(Order.State.CHARGED);
         orderDAO.save(order);
-        return order;
     }
 
 }

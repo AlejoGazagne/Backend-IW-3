@@ -11,32 +11,33 @@ import ar.edu.iw3.model.business.exceptions.TruckloadException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public interface IOrderBusiness {
-    public Order find(long id) throws NotFoundException, BusinessException;
+    public Order find(String externalId) throws NotFoundException, BusinessException;
 
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
 
+    Order findById(long id) throws NotFoundException, BusinessException;
+
     public List<Order> list() throws BusinessException;
 
-    public void delete(long id) throws NotFoundException, BusinessException;
+    public void delete(String externalId) throws NotFoundException, BusinessException;
 
     public Order update(Order order) throws NotFoundException, BusinessException;
 
-    public void firstWeighing(long id, float tare) throws NotFoundException, BusinessException, StateException, PasswordException;
+    public void firstWeighing(String externalId, float tare) throws NotFoundException, BusinessException, StateException, PasswordException;
 
     public Order addExternal(String json) throws BusinessException, FoundException, NotFoundException;
 
-    public Map<String, Object> finalWeighing(long orderId, float finalWeight) throws NotFoundException, BusinessException, StateException;
+    public Map<String, Object> finalWeighing(String externalId, float finalWeight) throws NotFoundException, BusinessException, StateException;
 
     public Map<String, Object> conciliationJson(Order order) throws NotFoundException, BusinessException, StateException;
 
-    public byte[] conciliationPdf(long orderId) throws NotFoundException, BusinessException, StateException;
+    public byte[] conciliationPdf(String externalId) throws NotFoundException, BusinessException, StateException;
 
-    public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
+    public void beginTruckLoading(long orderId, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 
-    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
+    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
 
-    public Order finishTruckLoading(long id) throws BusinessException, NotFoundException, StateException;
+    public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException;
 }

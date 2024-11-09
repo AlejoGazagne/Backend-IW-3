@@ -17,6 +17,9 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(unique = true)
+    private String externalId;
+
     @Column(length = 60, nullable = false, unique = true)
     private String companyName;
 

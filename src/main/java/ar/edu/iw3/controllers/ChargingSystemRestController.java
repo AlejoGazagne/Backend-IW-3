@@ -32,25 +32,22 @@ public class ChargingSystemRestController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Orden validada"),
             @ApiResponse(responseCode = "400", description = "Orden no encontrada"),
-            @ApiResponse(responseCode = "401", description = "Contraseña incorrecta"),// todo: mmmmm
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping("/validate-password")
     public ResponseEntity<?> validatePassword(@RequestParam Integer password) {
         try {
-            Order order = orderBusiness.validatePassword(password);
+            String response = orderBusiness.validatePassword(password);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/validate-password");
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | PasswordException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (StateException e) {
             return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT);
-        } catch (PasswordException e) {
-            return new ResponseEntity<>(response.build(HttpStatus.UNAUTHORIZED, e, e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -62,7 +59,7 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "404", description = "Error de los datos"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/{orderId}")
+    @PostMapping("/load-truck/{orderId}")
     public ResponseEntity<?> loadTruck(@PathVariable long orderId, @RequestBody LoadData loadData) {
         try {
             orderBusiness.beginTruckLoading(orderId, loadData);
@@ -86,12 +83,12 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/finish/{orderId}")
-    public ResponseEntity<?> finishTruckLoading(@PathVariable long orderId) {
+    @PostMapping("/finish/{externalOrderId}")
+    public ResponseEntity<?> finishTruckLoading(@PathVariable String externalOrderId) {
         try {
-            orderBusiness.finishTruckLoading(orderId);
+            orderBusiness.finishTruckLoading(externalOrderId);
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/finish/" + orderId);
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/finish/" + externalOrderId);
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

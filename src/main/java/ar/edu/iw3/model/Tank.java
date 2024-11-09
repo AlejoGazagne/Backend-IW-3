@@ -17,6 +17,9 @@ public class Tank {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(unique = true)
+    private String externalId;
+
     @Column(nullable = false)
     private long capacity;
 

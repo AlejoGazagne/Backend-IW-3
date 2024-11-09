@@ -19,26 +19,26 @@ public class DriverBusiness implements IDriverBusiness {
     private DriverRepository driverDAO;
 
     @Override
-    public Driver find(long id) throws NotFoundException, BusinessException {
+    public Driver find(String externalId) throws NotFoundException, BusinessException {
         Optional<Driver> driver;
         try {
-            driver = driverDAO.findById(id);
+            driver = driverDAO.findByExternalId(externalId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
 
         if(driver.isEmpty()) {
-            throw NotFoundException.builder().message("Driver not found, id = " + id).build();
+            throw NotFoundException.builder().message("Driver not found, id = " + externalId).build();
         }
         return driver.get();
     }
 
     @Override
-    public Driver find(String driver) throws NotFoundException, BusinessException {
+    public Driver find(Driver driver) throws NotFoundException, BusinessException {
         Optional<Driver> d;
         try {
-            d = driverDAO.findByDocument(driver);
+            d = driverDAO.findByExternalId(driver.getExternalId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
@@ -53,8 +53,8 @@ public class DriverBusiness implements IDriverBusiness {
     @Override
     public Driver add(Driver driver) throws FoundException, BusinessException {
         try {
-            find(driver.getId());
-            throw FoundException.builder().message("Driver exist, id = " + driver.getId()).build();
+            find(driver.getExternalId());
+            throw FoundException.builder().message("Driver exist, id = " + driver.getExternalId()).build();
         } catch(NotFoundException ignored){
         }
         try {
@@ -69,7 +69,7 @@ public class DriverBusiness implements IDriverBusiness {
     public Driver findOrCreate(Driver driver) throws BusinessException {
         Optional<Driver> tmp;
         try {
-            tmp = driverDAO.findByDocument(driver.getDocument());
+            tmp = driverDAO.findByExternalId(driver.getExternalId());
             return tmp.orElseGet(() -> driverDAO.save(driver));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -79,17 +79,8 @@ public class DriverBusiness implements IDriverBusiness {
 
     @Override
     public Driver update(Driver driver) throws FoundException, NotFoundException, BusinessException {
-        find(driver.getId());
-        Optional<Driver> existingDriver = null;
-        try {
-            existingDriver = driverDAO.findById(driver.getId());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
-        }
-        if(existingDriver.isPresent()) {
-            throw FoundException.builder().message("Se encontro un Driver con id = " + driver.getId()).build();
-        }
+        find(driver.getExternalId());
+
         try {
             return driverDAO.save(driver);
         } catch (Exception e) {

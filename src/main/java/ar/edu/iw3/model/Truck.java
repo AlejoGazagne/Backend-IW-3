@@ -19,6 +19,9 @@ public class Truck {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(unique = true)
+    private String externalId;
+
     @Column(length = 10, nullable = false, unique = true)
     private String plate;
 

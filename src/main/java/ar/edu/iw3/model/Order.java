@@ -28,6 +28,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(unique = true)
+    private String externalId;
+
     @Column(length = 5, unique = true)
     private Integer password;
 

@@ -19,26 +19,26 @@ public class ClientBusiness implements IClientBusiness {
     private ClientRepository clientDAO;
 
     @Override
-    public Client find(long id) throws NotFoundException, BusinessException {
+    public Client find(String externalId) throws NotFoundException, BusinessException {
         Optional<Client> client;
         try {
-            client = clientDAO.findById(id);
+            client = clientDAO.findByExternalId(externalId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
 
         if(client.isEmpty()) {
-            throw NotFoundException.builder().message("Client not found, id = " + id).build();
+            throw NotFoundException.builder().message("Client not found, id = " + externalId).build();
         }
         return client.get();
     }
 
     @Override
-    public Client find(String client) throws NotFoundException, BusinessException {
+    public Client find(Client client) throws NotFoundException, BusinessException {
         Optional<Client> c;
         try {
-            c = clientDAO.findByCompanyName(client);
+            c = clientDAO.findByExternalId(client.getExternalId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
@@ -53,8 +53,8 @@ public class ClientBusiness implements IClientBusiness {
     @Override
     public Client add(Client client) throws FoundException, BusinessException {
         try {
-            find(client.getId());
-            throw FoundException.builder().message("Client exist, id = " + client.getId()).build();
+            find(client.getExternalId());
+            throw FoundException.builder().message("Client exist, id = " + client.getExternalId()).build();
         } catch(NotFoundException ignored){
         }
         try {
@@ -67,10 +67,11 @@ public class ClientBusiness implements IClientBusiness {
 
     @Override
     public Client update(Client client) throws FoundException, NotFoundException, BusinessException {
-        find(client.getId());
+        find(client.
+                getExternalId());
         Optional<Client> existingClient = null;
         try {
-            existingClient = clientDAO.findById(client.getId());
+            existingClient = clientDAO.findByExternalId(client.getExternalId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
@@ -92,7 +93,7 @@ public class ClientBusiness implements IClientBusiness {
     public Client findOrCreate(Client client) throws BusinessException {
         Optional<Client> tmp;
         try {
-            tmp = clientDAO.findByCompanyName(client.getCompanyName());
+            tmp = clientDAO.findByExternalId(client.getExternalId());
             return tmp.orElseGet(() -> clientDAO.save(client));
         } catch (Exception e) {
             log.error(e.getMessage(), e);

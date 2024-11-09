@@ -29,32 +29,32 @@ public class TruckBusiness implements ITruckBusiness {
     private ITankBusiness tankBusiness;
 
     @Override
-    public Truck find(long id) throws NotFoundException, BusinessException {
+    public Truck find(String externalId) throws NotFoundException, BusinessException {
         Optional<Truck> truck;
         try {
-            truck = truckDAO.findById(id);
+            truck = truckDAO.findByExternalId(externalId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
 
         if(truck.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, id = " + id).build();
+            throw NotFoundException.builder().message("Truck not found, external id = " + externalId).build();
         }
         return truck.get();
     }
 
     @Override
-    public Truck find(String truck) throws NotFoundException, BusinessException {
+    public Truck find(Truck truck) throws NotFoundException, BusinessException {
         Optional<Truck> t;
         try {
-            t = truckDAO.findByPlate(truck);
+            t = truckDAO.findByExternalId(truck.getExternalId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
         if (t.isEmpty()) {
-            throw NotFoundException.builder().message("Truck not found, plate = " + truck).build();
+            throw NotFoundException.builder().message("Truck not found, external ID = " + truck.getExternalId()).build();
         }
         return t.get();
     }
@@ -62,8 +62,8 @@ public class TruckBusiness implements ITruckBusiness {
     @Override
     public Truck add(Truck truck) throws FoundException, BusinessException {
         try {
-            find(truck.getId());
-            throw FoundException.builder().message("Truck exist, id = " + truck.getId()).build();
+            find(truck.getExternalId());
+            throw FoundException.builder().message("Truck exist, id = " + truck.getExternalId()).build();
         } catch(NotFoundException ignored){
         }
         try {
@@ -78,7 +78,7 @@ public class TruckBusiness implements ITruckBusiness {
     public Truck findOrCreate(Truck truck) throws BusinessException {
         Optional<Truck> tmp;
         try {
-            tmp = truckDAO.findByPlate(truck.getPlate());
+            tmp = truckDAO.findByExternalId(truck.getExternalId());
             return tmp.orElseGet(() -> truckDAO.save(truck));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -88,16 +88,16 @@ public class TruckBusiness implements ITruckBusiness {
 
     @Override
     public Truck update(Truck truck) throws FoundException, NotFoundException, BusinessException {
-        find(truck.getId());
+        find(truck.getExternalId());
         Optional<Truck> truckExistente;
         try {
-            truckExistente = truckDAO.findById(truck.getId());
+            truckExistente = truckDAO.findByExternalId(truck.getExternalId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
         if (truckExistente.isPresent()) {
-            throw FoundException.builder().message("Se encontró el Truck con patente = " + truck.getPlate()).build();
+            throw FoundException.builder().message("Se encontró el Truck con id externo = " + truck.getExternalId() ).build();
         }
         try {
             return truckDAO.save(truck);

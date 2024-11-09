@@ -2,12 +2,12 @@ package ar.edu.iw3.util;
 
 public class JsonConstants {
 
-    public static final String[] ORDER_NUMBER = {"orderNumber", "order_number", "numberOrder", "id", "order_id", "id_order"};
+    public static final String[] ORDER_NUMBER = {"externalId", "orderNumber", "order_number", "numberOrder", "id", "order_id", "id_order"};
     public static final String[] PRESET = {"preset", "preset_value", "presetValue", "preset_value"};
     public static final String[] EXPECTED_CHARGE_DATE = {"expectedChargeDate", "expected_charge_date", "chargeDate", "charge_date"};
 
     public static final String[] DRIVER = { "driver", "Driver" };
-    public static final String[] DRIVER_ID = { "id", "driver_id" };
+    public static final String[] DRIVER_ID = {"externalId", "id", "driver_id" };
     public static final String[] DRIVER_NAME = { "name", "driver_name" };
     public static final String[] DRIVER_LASTNAME = { "lastname", "driver_lastname", "last_name", "driver_last_name" };
     public static final String[] DRIVER_DOCUMENT = { "driver_document", "driver_document_number", "document", "document_number" };
