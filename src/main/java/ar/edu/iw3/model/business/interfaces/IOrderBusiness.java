@@ -35,7 +35,7 @@ public interface IOrderBusiness {
 
     public byte[] conciliationPdf(String externalId) throws NotFoundException, BusinessException, StateException;
 
-    public void beginTruckLoading(long orderId, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
+    public Order beginTruckLoading(long orderId, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 
     public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
 
