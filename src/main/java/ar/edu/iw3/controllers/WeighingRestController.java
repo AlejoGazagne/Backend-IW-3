@@ -31,7 +31,7 @@ public class WeighingRestController extends BaseRestController {
     private IOrderBusiness orderBusiness;
 
     @Operation(operationId = "FirstWeighing", summary = "Cargar el primer pesaje, creación de password y cambio de estado de la orden")
-    @Parameter(in = ParameterIn.PATH, name = "orderId", description = "Id de la orden", required = true)
+    @Parameter(in = ParameterIn.PATH, name = "externalOrderId", description = "Id externo de la orden", required = true)
     @Parameter(in = ParameterIn.QUERY, name = "tare", description = "Tara (Peso del camión vacío)", required = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Carga del pesaje, generación de password y cambio de estado exitosos"),
@@ -39,12 +39,12 @@ public class WeighingRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación o no se pudo generar la password de la orden."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/first/{orderId}")
-    public ResponseEntity<?> firstWeighing(@PathVariable long orderId, @RequestParam float tare) {
+    @PostMapping("/first/{externalOrderId}")
+    public ResponseEntity<?> firstWeighing(@PathVariable String externalOrderId, @RequestParam float tare) {
         try {
-            orderBusiness.firstWeighing(orderId, tare);
+            orderBusiness.firstWeighing(externalOrderId, tare);
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("location", Constants.URL_WEIGHING + "/first/" + orderId);
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/first/" + externalOrderId);
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -56,7 +56,7 @@ public class WeighingRestController extends BaseRestController {
     }
 
     @Operation(operationId = "SecondWeighing", summary = "Cargar pesaje final y cambio de estado")
-    @Parameter(in = ParameterIn.PATH, name = "orderId", description = "Id de la orden", required = true)
+    @Parameter(in = ParameterIn.PATH, name = "externalOrderId", description = "Id esterno de la orden", required = true)
     @Parameter(in = ParameterIn.QUERY, name = "finalWeight", description = "Peso final del camión", required = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Carga del pesaje y cambio de estado exitosos"),
@@ -64,12 +64,12 @@ public class WeighingRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/final/{orderId}")
-    public ResponseEntity<?> finalWeighing(@PathVariable long orderId, @RequestParam float finalWeight) {
+    @PostMapping("/final/{externalOrderId}")
+    public ResponseEntity<?> finalWeighing(@PathVariable String externalOrderId, @RequestParam float finalWeight) {
         try {
-            Map<String, Object> response = orderBusiness.finalWeighing(orderId, finalWeight);
+            Map<String, Object> response = orderBusiness.finalWeighing(externalOrderId, finalWeight);
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("location", Constants.URL_WEIGHING + "/final/" + orderId);
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/final/" + externalOrderId);
             return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

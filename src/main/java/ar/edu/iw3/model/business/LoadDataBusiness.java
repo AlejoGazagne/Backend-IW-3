@@ -82,19 +82,16 @@ public class LoadDataBusiness implements ILoadDataBusiness {
 
     @Override
     public Double avgTemperature(long orderId) throws BusinessException, NotFoundException {
-        LoadData loadData = find(orderId);
         return loadDataDAO.avgTemperature(orderId);
     }
 
     @Override
     public Double avgDensity(long orderId) throws BusinessException, NotFoundException {
-        LoadData loadData = find(orderId);
         return loadDataDAO.avgDensity(orderId);
     }
 
     @Override
     public Double avgCaudal(long orderId) throws BusinessException, NotFoundException {
-        LoadData loadData = find(orderId);
         return loadDataDAO.avgCaudal(orderId);
     }
 
@@ -104,7 +101,7 @@ public class LoadDataBusiness implements ILoadDataBusiness {
 
     public Order createLoadData(Timestamp currentTime, LoadData loadData, Order order) throws FoundException, BusinessException, NotFoundException{
 
-        Optional<List<LoadData>> loadDataList = loadDataDAO.findByOrderId(loadData.getOrder().getId());
+        Optional<List<LoadData>> loadDataList = loadDataDAO.findByOrderId(order.getId());
 
         if (loadDataList.isPresent() && !loadDataList.get().isEmpty()){
             Date dateFinalCharge = order.getDateFinalCharge();
@@ -113,14 +110,15 @@ public class LoadDataBusiness implements ILoadDataBusiness {
                 add(loadData);
                 order.setDateFinalCharge(currentTime);
 
-                truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+                //truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
             }
 
         }else{
             loadData.setTimestampLoad(currentTime);
+            loadData.setOrder(order);
             add(loadData);
             order.setDateFinalCharge(currentTime);
-            truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+            //truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
         }
 
         return order;

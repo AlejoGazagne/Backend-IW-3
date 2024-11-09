@@ -29,20 +29,20 @@ public class ConciliationRestController extends BaseRestController {
     private IOrderBusiness orderBusiness;
 
     @Operation(operationId = "conciliation", summary = "Genera un archivo PDF con la conciliación de la orden")
-    @Parameter(in = ParameterIn.PATH, name = "orderId", description = "Id de la orden", required = true)
+    @Parameter(in = ParameterIn.PATH, name = "externalOrderId", description = "Id externo de la orden", required = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Conciliación generada exitosamente"),
             @ApiResponse(responseCode = "404", description = "Orden no encontrada"),
             @ApiResponse(responseCode = "409", description = "La orden no se encuentra en estado de conciliación"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<byte[]> conciliation(@PathVariable long orderId){
+    @GetMapping("/order/{externalOrderId}")
+    public ResponseEntity<byte[]> conciliation(@PathVariable String externalOrderId){
         try {
-            byte[] pdf = orderBusiness.conciliationPdf(orderId);
+            byte[] pdf = orderBusiness.conciliationPdf(externalOrderId);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "conciliation-order" + orderId + ".pdf");
+            headers.setContentDispositionFormData("filename", "conciliation-order" + externalOrderId + ".pdf");
             return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
         } catch (BusinessException e) {
             String errorMessage = e.getMessage();

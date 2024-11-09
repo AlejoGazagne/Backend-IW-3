@@ -201,7 +201,16 @@ public class JsonUtiles {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
-                    return objectMapper.treeToValue(node.get(key), type);
+                    Client obj = objectMapper.treeToValue(node.get(key), type);
+                    if (obj != null) {
+                        for (String key2 : JsonConstants.CLIENT_ID) {
+                            if (node.get(key).has(key2)) {
+                                obj.setId(0);
+                                obj.setExternalId(node.get(key).get(key2).asText());
+                            }
+                        }
+                    }
+                    return obj;
                 } catch (Exception e) {
                     throw new OrderDeserializationException("Error al mappear el cliente");
                     //System.err.println("Error al convertir el valor de '" + key + "' al tipo " + type.getSimpleName() + ": " + e.getMessage());
@@ -217,7 +226,16 @@ public class JsonUtiles {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
-                    return objectMapper.treeToValue(node.get(key), type);
+                    Driver obj = objectMapper.treeToValue(node.get(key), type);
+                    if (obj != null) {
+                        for (String key2 : JsonConstants.DRIVER_ID) {
+                            if (node.get(key).has(key2)) {
+                                obj.setId(0);
+                                obj.setExternalId(node.get(key).get(key2).asText());
+                            }
+                        }
+                    }
+                    return obj;
                 } catch (Exception e) {
                     throw new OrderDeserializationException("Error al mappear el Driver");
                 }
@@ -247,7 +265,16 @@ public class JsonUtiles {
             if (node.has(key) && !node.get(key).isNull()) {
                 try {
                     // Intenta convertir el nodo JSON al tipo especificado
-                    return objectMapper.treeToValue(node.get(key), type);
+                    Truck obj = objectMapper.treeToValue(node.get(key), type);
+                    if (obj != null) {
+                        for (String key2 : JsonConstants.TRUCK_ID) {
+                            if (node.get(key).has(key2)) {
+                                obj.setId(0);
+                                obj.setExternalId(node.get(key).get(key2).asText());
+                            }
+                        }
+                    }
+                    return obj;
                 } catch (Exception e) {
                     throw new OrderDeserializationException("Error al mappear el Truck");
                 }
@@ -265,7 +292,16 @@ public class JsonUtiles {
                     // Intenta convertir el nodo JSON al tipo especificado
                     List<Tank> tanks = new ArrayList<>(List.of());
                     for(JsonNode i: node.get(key)){
-                        tanks.add(objectMapper.treeToValue(i, type));
+                        Tank obj = objectMapper.treeToValue(i, type);
+                        if (obj != null) {
+                            for (String key2 : JsonConstants.TANK_ID) {
+                                if (i.has(key2)) {
+                                    obj.setId(0);
+                                    obj.setExternalId(i.get(key2).asText());
+                                }
+                            }
+                        }
+                        tanks.add(obj);
                     }
                     return tanks;
                 } catch (Exception e) {
