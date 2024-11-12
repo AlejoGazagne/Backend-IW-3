@@ -293,14 +293,6 @@ public class JsonUtiles {
                     List<Tank> tanks = new ArrayList<>(List.of());
                     for(JsonNode i: node.get(key)){
                         Tank obj = objectMapper.treeToValue(i, type);
-                        if (obj != null) {
-                            for (String key2 : JsonConstants.TANK_ID) {
-                                if (i.has(key2)) {
-                                    obj.setId(0);
-                                    obj.setExternalId(i.get(key2).asText());
-                                }
-                            }
-                        }
                         tanks.add(obj);
                     }
                     return tanks;

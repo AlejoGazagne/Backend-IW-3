@@ -97,7 +97,7 @@ public class ClientBusiness implements IClientBusiness {
             return tmp.orElseGet(() -> clientDAO.save(client));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
+            throw BusinessException.builder().message("Error al crear Cliente.").build();
         }
     }
 }

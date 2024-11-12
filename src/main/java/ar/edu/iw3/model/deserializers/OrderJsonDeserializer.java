@@ -66,14 +66,13 @@ public class OrderJsonDeserializer extends StdDeserializer<Order> {
             if (truck != null) {
                 if (tanks != null) {
                     for (Tank tank : tanks) {
+                        tank.setId(0);
                         tank.setTruck(truck);
                     }
                     truck.setTanks(tanks);
                 }
                 order.setTruck(truck);
             }
-            System.out.println(order.getTruck());
-            System.out.println(order.getTruck().getTanks());
 
         } catch (Exception e) {
             throw new OrderDeserializationException("Error al deserializar la orden: " + e.getMessage(), e);

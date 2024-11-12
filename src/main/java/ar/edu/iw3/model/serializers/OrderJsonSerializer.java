@@ -18,11 +18,14 @@ public class OrderJsonSerializer extends StdSerializer<Order> {
     @Override
     public void serialize(Order order, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
-        jsonGenerator.writeStringField("orderId", order.getExternalId());
+        jsonGenerator.writeStringField("orderId", String.valueOf(order.getId()));
         jsonGenerator.writeNumberField("preset", order.getPreset());
+
+        // Inicia el objeto "product" dentro del JSON
         jsonGenerator.writeObjectFieldStart("product");
         jsonGenerator.writeStringField("name", order.getProduct().getName());
         jsonGenerator.writeEndObject();
+
         jsonGenerator.writeEndObject();
     }
 }

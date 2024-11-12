@@ -18,6 +18,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +33,6 @@ public class SAPRestController extends BaseRestController {
     @Autowired
     private IOrderBusiness orderBusiness;
 
-
     @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
     @Parameter(in = ParameterIn.DEFAULT, name = "order", description = "Orden de carga", required = true)
     @ApiResponses(value = {
@@ -42,6 +42,7 @@ public class SAPRestController extends BaseRestController {
             @ApiResponse(responseCode = "500", description = "Error interno del servidor"),
             @ApiResponse(responseCode = "302", description = "Orden de carga ya existente")
     })
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
     @PostMapping("/order")
     public ResponseEntity<?> addExternal(HttpEntity<String> httpEntity){
         try {

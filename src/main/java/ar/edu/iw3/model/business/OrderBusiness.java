@@ -48,21 +48,21 @@ public class OrderBusiness implements IOrderBusiness {
         return order.get();
     }
 
-    @Override
-    public Order findById(long id) throws NotFoundException, BusinessException {
-        Optional<Order> order;
-        try {
-            order = orderDAO.findById(id);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
-        }
-
-        if(order.isEmpty()) {
-            throw NotFoundException.builder().message("Order not found, id = " + id).build();
-        }
-        return order.get();
-    }
+//    @Override
+//    public Order findById(long id) throws NotFoundException, BusinessException {
+//        Optional<Order> order;
+//        try {
+//            order = orderDAO.findById(id);
+//        } catch (Exception e) {
+//            log.error(e.getMessage(), e);
+//            throw BusinessException.builder().ex(e).build();
+//        }
+//
+//        if(order.isEmpty()) {
+//            throw NotFoundException.builder().message("Order not found, id = " + id).build();
+//        }
+//        return order.get();
+//    }
 
     @Override
     public List<Order> list() throws BusinessException {
@@ -115,7 +115,6 @@ public class OrderBusiness implements IOrderBusiness {
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException {
         try {
             find(order.getExternalId());
-            throw FoundException.builder().message("Order exists, id = " + order.getId()).build();
         } catch(NotFoundException ignored){
         }
         // Validate and findOrCreate related entities
@@ -128,10 +127,10 @@ public class OrderBusiness implements IOrderBusiness {
             order.setDateReceived(JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())));
         } catch (BusinessException e) {
             log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
+            throw BusinessException.builder().message("Error al crear entidades: " + e.getMessage()).build();
         } catch (NotFoundException e) {
             log.error(e.getMessage(), e);
-            throw NotFoundException.builder().message("Error al buscar o crear entidades relacionadas.").ex(e).build();
+            throw NotFoundException.builder().message("Error al buscar la entidad.").ex(e).build();
         }
 
         try {
@@ -185,7 +184,7 @@ public class OrderBusiness implements IOrderBusiness {
                     throw PasswordException.builder().message("Error al generar password unica.").build();
                 }
             } while (!isUnique);
-            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
+            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now()));
             order.setDateFirstWeighing(date);
             order.setPassword(pass);
             order.setTare(tare);
@@ -212,7 +211,7 @@ public class OrderBusiness implements IOrderBusiness {
         try {
             order.setFinalWeight(finalWeight);
             order.setState(Order.State.FINAL_WEIGHING);
-            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now())); // todo: ver esta fecha
+            Date date = JsonUtiles.parseDate(String.valueOf(LocalDateTime.now()));
             order.setDateFinalWeighing(date);
             Map<String, Object> conciliation = conciliationJson(order);
             orderDAO.save(order);
@@ -282,7 +281,7 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
-    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException, JsonProcessingException {
+    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException {
         Optional<Order> order;
         try {
             order = orderDAO.findByPassword(password);
@@ -293,21 +292,27 @@ public class OrderBusiness implements IOrderBusiness {
         if(order.isEmpty()) {
             throw NotFoundException.builder().message("Order not found.").build();
         }
+        System.out.println(order.get().getState());
 
         if (order.get().getState() != Order.State.FIRST_WEIGHING){
             throw StateException.builder().message("This order is not compatible with this operation.").build();
         }
 
         if(password.equals(order.get().getPassword())){
-            StdSerializer<Order> serializer = new OrderJsonSerializer(Order.class);
-            return JsonUtiles.getObjectMapper(Order.class, serializer, null).writeValueAsString(order.get());
+            return order.get();
         }else{
             throw PasswordException.builder().message("Incorrect password.").build();
         }
     }
 
     public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
-        Order order = findById(id);
+        Optional<Order> tmp = orderDAO.findById(id);
+
+        if (tmp.isEmpty()){
+            throw NotFoundException.builder().message("Order not found.").build();
+        }
+
+        Order order = tmp.get();
 
         if (order.getState() != Order.State.FIRST_WEIGHING) {
             throw StateException.builder().message("This order is not compatible with this operation.").build();
@@ -348,15 +353,20 @@ public class OrderBusiness implements IOrderBusiness {
 
     }
 
-    public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException {
+    public void finishTruckLoading(long orderId) throws BusinessException, NotFoundException, StateException {
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-        Order order = find(externalId);
-        order.setDateFinalCharge(currentTime);
-        if (order.getState() != Order.State.FIRST_WEIGHING) {
+        Optional<Order> order = orderDAO.findById(orderId);
+
+        if (order.isEmpty()){
+            throw NotFoundException.builder().message("Order not found.").build();
+        }
+
+        order.get().setDateFinalCharge(currentTime);
+        if (order.get().getState() != Order.State.FIRST_WEIGHING) {
             throw StateException.builder().message("This order is not compatible with the closing operation.").build();
         }
-        order.setState(Order.State.CHARGED);
-        orderDAO.save(order);
+        order.get().setState(Order.State.CHARGED);
+        orderDAO.save(order.get());
     }
 
 }

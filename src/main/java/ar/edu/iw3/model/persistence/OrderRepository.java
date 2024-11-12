@@ -21,4 +21,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     public Optional<Order> findByExternalId(String externalId) throws NotFoundException;
 
     public void deleteByExternalId(String externalId) throws NotFoundException;
+
+    public Optional<Order> findById(long id) throws NotFoundException;
 }

@@ -18,7 +18,7 @@ public interface IOrderBusiness {
 
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
 
-    Order findById(long id) throws NotFoundException, BusinessException;
+    //public Order findById(long id) throws NotFoundException, BusinessException;
 
     public List<Order> list() throws BusinessException;
 
@@ -38,7 +38,7 @@ public interface IOrderBusiness {
 
     public Order beginTruckLoading(long orderId, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException;
 
-    public String validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException, JsonProcessingException;
+    public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
 
-    public void finishTruckLoading(String externalId) throws BusinessException, NotFoundException, StateException;
+    public void finishTruckLoading(long orderId) throws BusinessException, NotFoundException, StateException;
 }

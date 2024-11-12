@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -39,6 +40,7 @@ public class WeighingRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación o no se pudo generar la password de la orden."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
+    @PreAuthorize("hasRole('ROLE_WEIGHING') or hasRole('ROLE_ADMIN')")
     @PostMapping("/first/{externalOrderId}")
     public ResponseEntity<?> firstWeighing(@PathVariable String externalOrderId, @RequestParam float tare) {
         try {
@@ -64,6 +66,7 @@ public class WeighingRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
+    @PreAuthorize("hasRole('ROLE_WEIGHING') or hasRole('ROLE_ADMIN')")
     @PostMapping("/final/{externalOrderId}")
     public ResponseEntity<?> finalWeighing(@PathVariable String externalOrderId, @RequestParam float finalWeight) {
         try {

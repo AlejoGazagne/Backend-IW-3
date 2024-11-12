@@ -37,6 +37,7 @@ public class ConciliationRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden no se encuentra en estado de conciliación"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SAP') or hasRole('ROLE_WEIGHING') or hasRole('ROLE_CHARGING_SYSTEM')")
     @GetMapping("/order/{externalOrderId}")
     public ResponseEntity<byte[]> conciliation(@PathVariable String externalOrderId){
         try {
