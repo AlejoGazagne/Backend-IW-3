@@ -82,7 +82,7 @@ public class TruckBusiness implements ITruckBusiness {
             return tmp.orElseGet(() -> truckDAO.save(truck));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
+            throw BusinessException.builder().message("Error al crear Truck.").build();
         }
     }
 

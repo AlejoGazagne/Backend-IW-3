@@ -21,16 +21,16 @@ public class TankBusiness implements ITankBusiness {
     private TankRepository tankDAO;
 
     @Override
-    public Tank find(String externalId) throws NotFoundException, BusinessException {
+    public Tank find(long id) throws NotFoundException, BusinessException {
         Optional<Tank> tank;
         try {
-            tank = tankDAO.findByExternalId(externalId);
+            tank = tankDAO.findById(id);
         } catch (Exception e){
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
         if (tank.isEmpty()){
-            throw NotFoundException.builder().message("Tank not found, external id = " + externalId).build();
+            throw NotFoundException.builder().message("Tank not found, external id = " + id).build();
         }
         return tank.get();
     }
@@ -39,8 +39,8 @@ public class TankBusiness implements ITankBusiness {
     public List<Tank> add(List<Tank> tanks) throws BusinessException, FoundException {
         try {
             for (Tank t : tanks){
-                find(t.getExternalId());
-                throw FoundException.builder().message("Tank exist, external id = " + t.getExternalId()).build();
+                find(t.getId());
+                throw FoundException.builder().message("Tank exist, external id = " + t.getId()).build();
             }
         } catch (NotFoundException ignored){
         }
@@ -54,16 +54,16 @@ public class TankBusiness implements ITankBusiness {
 
     @Override
     public Tank update(Tank tank) throws NotFoundException, BusinessException, FoundException {
-        find(tank.getExternalId());
+        find(tank.getId());
         Optional<Tank> t;
         try {
-            t = tankDAO.findByExternalId(tank.getExternalId());
+            t = tankDAO.findById(tank.getId());
         } catch (Exception e){
             log.error(e.getMessage(), e);
             throw BusinessException.builder().ex(e).build();
         }
         if (t.isPresent()) {
-            throw FoundException.builder().message("Tank exist, external id = " + tank.getExternalId()).build();
+            throw FoundException.builder().message("Tank exist, external id = " + tank.getId()).build();
         }
         try {
             return tankDAO.save(tank);

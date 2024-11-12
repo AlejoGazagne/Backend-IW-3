@@ -4,8 +4,12 @@ import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
+import ar.edu.iw3.model.serializers.OrderJsonSerializer;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+import ar.edu.iw3.util.JsonUtiles;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -16,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping(Constants.URL_CHARGING_SYSTEM)
@@ -36,13 +43,16 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
+    @PreAuthorize("hasRole('ROLE_CHARGING_SYSTEM') or hasRole('ROLE_ADMIN')")
     @PostMapping("/validate-password")
     public ResponseEntity<?> validatePassword(@RequestParam Integer password) {
         try {
-            String response = orderBusiness.validatePassword(password);
+            Order response = orderBusiness.validatePassword(password);
+            ObjectMapper mapper = JsonUtiles.getObjectMapper(Order.class, new OrderJsonSerializer(Order.class), null);
+            String rspJson = mapper.writeValueAsString(response);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/validate-password");
-            return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
+            return new ResponseEntity<>(rspJson, responseHeaders, HttpStatus.OK);
         } catch (BusinessException | JsonProcessingException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NotFoundException | PasswordException e) {
@@ -60,6 +70,7 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "404", description = "Error de los datos"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
+    @PreAuthorize("hasRole('ROLE_CHARGING_SYSTEM') or hasRole('ROLE_ADMIN')")
     @PostMapping("/load-truck/{orderId}")
     public ResponseEntity<?> loadTruck(@PathVariable long orderId, @RequestBody LoadData loadData) {
         try {
@@ -72,7 +83,7 @@ public class ChargingSystemRestController {
         } catch (NotFoundException | TruckloadException | StateException e) {
             return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (FoundException e) {
-            return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT); // todo: cuando tira esto?
+            return new ResponseEntity<>(response.build(HttpStatus.CONFLICT, e, e.getMessage()), HttpStatus.CONFLICT);
         }
     }
 
@@ -84,12 +95,13 @@ public class ChargingSystemRestController {
             @ApiResponse(responseCode = "409", description = "La orden de compra se encuentra en un estado que no permite realizar esta operación."),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PostMapping("/finish/{externalOrderId}")
-    public ResponseEntity<?> finishTruckLoading(@PathVariable String externalOrderId) {
+    @PreAuthorize("hasRole('ROLE_CHARGING_SYSTEM') or hasRole('ROLE_ADMIN')")
+    @PostMapping("/finish/{orderId}")
+    public ResponseEntity<?> finishTruckLoading(@PathVariable long orderId) {
         try {
-            orderBusiness.finishTruckLoading(externalOrderId);
+            orderBusiness.finishTruckLoading(orderId);
             HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/finish/" + externalOrderId);
+            responseHeaders.set("location", Constants.URL_WEIGHING + "/load-truck/finish/" + orderId);
             return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

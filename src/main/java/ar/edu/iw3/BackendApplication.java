@@ -8,6 +8,10 @@ import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.model.business.interfaces.ITankBusiness;
 import ar.edu.iw3.model.business.interfaces.ITruckBusiness;
+import ar.edu.iw3.model.serializers.OrderJsonSerializer;
+import ar.edu.iw3.util.JsonUtiles;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static ar.edu.iw3.model.Order.State.FIRST_WEIGHING;
 
 @SpringBootApplication
 @Slf4j
@@ -72,7 +78,12 @@ public class BackendApplication  implements CommandLineRunner{
 //		truck.setTanks(tanks);
 //		truckBusiness.add(truck);
 
-		
+//		Order order = orderBusiness.find("101");
+//		ObjectMapper mapper = JsonUtiles.getObjectMapper(Order.class, new OrderJsonSerializer(Order.class), null);
+//		String rspJson = mapper.writeValueAsString(order);
+//		System.out.println(rspJson);
+
+
 		/*
 		try {
 			Product p=new Product();

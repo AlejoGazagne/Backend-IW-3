@@ -73,7 +73,7 @@ public class DriverBusiness implements IDriverBusiness {
             return tmp.orElseGet(() -> driverDAO.save(driver));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw BusinessException.builder().ex(e).build();
+            throw BusinessException.builder().message("Error al crear Driver.").build();
         }
     }
 
