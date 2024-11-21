@@ -41,4 +41,5 @@ public interface IOrderBusiness {
     public Order validatePassword(Integer password) throws BusinessException, NotFoundException, StateException, PasswordException;
 
     public void finishTruckLoading(long orderId) throws BusinessException, NotFoundException, StateException;
+
 }

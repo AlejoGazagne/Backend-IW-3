@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "load_data")
 @AllArgsConstructor
@@ -37,5 +39,6 @@ public class LoadData {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_order", nullable = false)
+    @JsonBackReference
     private Order order;
 }

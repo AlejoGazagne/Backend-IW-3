@@ -53,8 +53,12 @@ public class ProductBusiness implements IProductBusiness {
 
     @Override
     public Product add(Product product) throws FoundException, BusinessException {
+        System.out.println("AVER CHANGO QUE PASA");
+        System.out.println(product.getId());
+        System.out.println(product.getName());
+        System.out.println(product.getLimitTemperature());
         try {
-            find(product.getId());
+            find(product.getName());
             throw FoundException.builder().message("Product exist, id = " + product.getId()).build();
         } catch(NotFoundException ignored){
         }
