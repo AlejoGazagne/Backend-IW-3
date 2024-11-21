@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -163,10 +164,7 @@ public class OrderBusiness implements IOrderBusiness {
             order = find(externalId);
         } catch (NotFoundException e){
             throw NotFoundException.builder().message("Order not found, id = " + externalId).build();
-        } catch (Exception e){
-            log.error(e.getMessage());
-            throw BusinessException.builder().ex(e).build();
-        }
+        } 
 
         if (order.getState() != Order.State.RECEIVED) {
             throw StateException.builder().message("This order has already begun or is already finished.").build();
@@ -305,6 +303,9 @@ public class OrderBusiness implements IOrderBusiness {
         }
     }
 
+    @Autowired
+    private SimpMessagingTemplate loadTruckWS;
+
     public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
         Optional<Order> tmp = orderDAO.findById(id);
 
@@ -347,8 +348,10 @@ public class OrderBusiness implements IOrderBusiness {
         order.setLastTemperature(loadData.getTemperature());
 
         order = loadDataBusiness.createLoadData(currentTime, loadData, order);
-
+        
         orderDAO.save(order);
+
+        //loadTruckWS.convertAndSend("/topic/loadTruck", order);
         return order;
 
     }
