@@ -32,7 +32,6 @@ public class OrderBusiness implements IOrderBusiness {
     @Autowired
     private ILoadDataBusiness loadDataBusiness;
 
-
     @Override
     public Order find(String externalId) throws NotFoundException, BusinessException {
         Optional<Order> order;
@@ -49,21 +48,26 @@ public class OrderBusiness implements IOrderBusiness {
         return order.get();
     }
 
-//    @Override
-//    public Order findById(long id) throws NotFoundException, BusinessException {
-//        Optional<Order> order;
-//        try {
-//            order = orderDAO.findById(id);
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//            throw BusinessException.builder().ex(e).build();
-//        }
-//
-//        if(order.isEmpty()) {
-//            throw NotFoundException.builder().message("Order not found, id = " + id).build();
-//        }
-//        return order.get();
-//    }
+    @Override
+    public Map<String, Object> getDetailsOrder(String id) throws NotFoundException, BusinessException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("avgTemperature", loadDataBusiness.avgTemperature(Long.parseLong(id)));
+        response.put("avgDensity", loadDataBusiness.avgDensity(Long.parseLong(id)));
+        response.put("avgCaudal", loadDataBusiness.avgCaudal(Long.parseLong(id)));
+
+        return response;
+    }
+
+    @Override
+    public Map<String, Object> countOrders() throws BusinessException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("total", orderDAO.count());
+        response.put("received", orderDAO.countOrderByStateReceived());
+        response.put("weighed", orderDAO.countOrderByStateWeighed());
+        response.put("charged", orderDAO.countOrderByStateCharged());
+        response.put("finished", orderDAO.countOrderByStatusFinished());
+        return response;
+    }
 
     @Override
     public List<Order> list() throws BusinessException {

@@ -2,6 +2,8 @@ package ar.edu.iw3.auth.controller;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -50,7 +52,7 @@ public class AuthRestController extends BaseRestController {
 			@ApiResponse(responseCode = "401", description = "Usuario o contraseña incorrectos"),
 			@ApiResponse(responseCode = "500", description = "Error interno del servidor")
 	})
-	@PostMapping(value = Constants.URL_LOGIN, produces = MediaType.TEXT_PLAIN_VALUE)
+	@PostMapping(value = Constants.URL_LOGIN, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> loginExternalOnlyToken(@RequestParam String username, @RequestParam String password) {
 		Authentication auth = null;
 		try {
@@ -71,7 +73,14 @@ public class AuthRestController extends BaseRestController {
 				.withExpiresAt(new Date(System.currentTimeMillis() + AuthConstants.EXPIRATION_TIME))
 				.sign(Algorithm.HMAC512(AuthConstants.SECRET.getBytes()));
 
-		return new ResponseEntity<String>(token, HttpStatus.OK);
+		// Create a map to hold the response data
+		Map<String, Object> responseData = new HashMap<>();
+		responseData.put("id", user.getIdUser());
+		responseData.put("username", user.getUsername());
+		responseData.put("roles", user.getAuthoritiesStr());
+		responseData.put("token", token);
+
+		return new ResponseEntity<>(responseData, HttpStatus.OK);
 	}
 
 	@Autowired

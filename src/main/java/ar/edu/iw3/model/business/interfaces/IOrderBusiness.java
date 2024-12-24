@@ -16,9 +16,11 @@ import java.util.Map;
 public interface IOrderBusiness {
     public Order find(String externalId) throws NotFoundException, BusinessException;
 
-    public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
+    public Map<String, Object> getDetailsOrder(String externalId) throws NotFoundException, BusinessException, StateException;
 
-    //public Order findById(long id) throws NotFoundException, BusinessException;
+    public Map<String, Object> countOrders() throws BusinessException;
+
+    public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
 
     public List<Order> list() throws BusinessException;
 
