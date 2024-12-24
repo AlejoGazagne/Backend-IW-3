@@ -23,4 +23,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     public void deleteByExternalId(String externalId) throws NotFoundException;
 
     public Optional<Order> findById(long id) throws NotFoundException;
+
+    @Query("select count(o) from Order o where o.state = 0")
+    public Integer countOrderByStateReceived();
+
+    @Query("select count(o) from Order o where o.state = 1")
+    public Integer countOrderByStateWeighed();
+
+    @Query("select count(o) from Order o where o.state = 2")
+    public Integer countOrderByStateCharged();
+
+    @Query("select count(o) from Order o where o.state = 3")
+    public Integer countOrderByStatusFinished();
 }
