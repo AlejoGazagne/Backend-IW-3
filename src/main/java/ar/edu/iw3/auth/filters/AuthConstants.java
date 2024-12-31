@@ -1,7 +1,7 @@
 package ar.edu.iw3.auth.filters;
 
 public final class AuthConstants {
-	public static final long EXPIRATION_TIME = (60 * 60 * 1000);
+	public static final long EXPIRATION_TIME = (60 * 60 * 60 * 1000);
 	public static final String SECRET = "MyVerySecretKey";
 	
 	public static final String AUTH_HEADER_NAME = "Authorization";

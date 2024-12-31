@@ -6,14 +6,14 @@ import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.*;
 import ar.edu.iw3.model.deserializers.OrderJsonDeserializer;
 import ar.edu.iw3.model.persistence.OrderRepository;
-import ar.edu.iw3.model.serializers.OrderJsonSerializer;
 import ar.edu.iw3.util.JsonUtiles;
 import ar.edu.iw3.util.PdfService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -61,12 +61,35 @@ public class OrderBusiness implements IOrderBusiness {
     @Override
     public Map<String, Object> countOrders() throws BusinessException {
         Map<String, Object> response = new HashMap<>();
-        response.put("total", orderDAO.count());
-        response.put("received", orderDAO.countOrderByStateReceived());
-        response.put("weighed", orderDAO.countOrderByStateWeighed());
-        response.put("charged", orderDAO.countOrderByStateCharged());
-        response.put("finished", orderDAO.countOrderByStatusFinished());
-        return response;
+
+        try {
+            response.put("total", orderDAO.count());
+
+            List<Map<String, Object>> states = new ArrayList<>();
+            states.add(new HashMap<>() {{
+                put("state", "received");
+                put("count", orderDAO.countOrderByState(Order.State.RECEIVED));
+            }});
+            states.add(new HashMap<>() {{
+                put("state", "weighed");
+                put("count", orderDAO.countOrderByState(Order.State.FIRST_WEIGHING));
+            }});
+            states.add(new HashMap<>() {{
+                put("state", "charged");
+                put("count", orderDAO.countOrderByState(Order.State.CHARGED));
+            }});
+            states.add(new HashMap<>() {{
+                put("state", "finished");
+                put("count", orderDAO.countOrderByState(Order.State.FINAL_WEIGHING));
+            }});
+
+            response.put("states", states);
+
+            return response;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
     }
 
     @Override
@@ -373,7 +396,85 @@ public class OrderBusiness implements IOrderBusiness {
             throw StateException.builder().message("This order is not compatible with the closing operation.").build();
         }
         order.get().setState(Order.State.CHARGED);
-        orderDAO.save(order.get());
+        orderDAO.save(order.get()); // TODO: si esto falla, no me tira un BusinessException
     }
 
+    @Override
+    public List<Map<String, Object>> countOrdersByMonth() throws BusinessException {
+        List<Map<String, Object>> response = new ArrayList<>();
+        String[] months = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+
+        try {
+            for (int i = 0; i < months.length; i++) {
+                Map<String, Object> monthData = new HashMap<>();
+                monthData.put("month", months[i]);
+                monthData.put("count", orderDAO.countOrderByDateReceived(i + 1));
+                response.add(monthData);
+            }
+            return response;
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> countProducts() throws BusinessException{
+        List<Map<String, Object>> response = new ArrayList<>();
+        try {
+            List<Object[]> data = orderDAO.findProductOrderCounts();
+
+            for (Object[] row : data) {
+                Map<String, Object> productData = new HashMap<>();
+
+                productData.put("productName", row[0]);
+                productData.put("count", row[1]);
+
+                response.add(productData);
+            }
+
+            return response;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> countAllClients() throws BusinessException{
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        try {
+            List<Object[]> data = orderDAO.findClientOrderCounts();
+
+            for (Object[] row : data) {
+                Map<String, Object> clientData = new HashMap<>();
+
+                clientData.put("clientName", row[0]);
+                clientData.put("count", row[1]);
+
+                response.add(clientData);
+            }
+
+            return response;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
+    public Page<Order> getOrders(int currentPage, Order.State state, int pageSize) throws BusinessException{
+        try {
+            Pageable pageable = PageRequest.of(currentPage, pageSize);
+            if (state == null) {
+                return orderDAO.findAll(pageable);
+            }
+            return orderDAO.findAllByState(state, pageable);
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
 }

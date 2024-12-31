@@ -2,10 +2,13 @@ package ar.edu.iw3.controllers;
 
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.Product;
+import ar.edu.iw3.model.business.ClientBusiness;
 import ar.edu.iw3.model.business.exceptions.*;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.model.business.interfaces.IProductBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -13,10 +16,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(Constants.URL_SAP)
 @Tag(description = "API del servicio SAP (Carga de la orden)", name = "SAP")
 public class SAPRestController extends BaseRestController {
+
     @Autowired
     private IStandartResponseBusiness response;
 
@@ -36,6 +38,8 @@ public class SAPRestController extends BaseRestController {
 
     @Autowired
     private IProductBusiness productBusiness;
+    @Autowired
+    private ClientBusiness clientBusiness;
 
     @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
     @Parameter(in = ParameterIn.DEFAULT, name = "order", description = "Orden de carga", required = true)
@@ -95,9 +99,13 @@ public class SAPRestController extends BaseRestController {
 
     @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
     @GetMapping("/orders")
-    public ResponseEntity<?> list(){
+    public ResponseEntity<?> getOrders(
+            @RequestParam("page") int currentPage,
+            @RequestParam("size") int pageSize,
+            @RequestParam(name = "filter", required = false) Order.State state) {
         try {
-            return new ResponseEntity<>(orderBusiness.list(), HttpStatus.OK);
+            Page<Order> orders = orderBusiness.getOrders(currentPage, state, pageSize);
+            return new ResponseEntity<>(orders, HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -105,11 +113,14 @@ public class SAPRestController extends BaseRestController {
 
     @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
     @PostMapping("/product")
-    public ResponseEntity<?> add(@RequestBody Product product){
-        System.out.println("AVER CHANGO QUE PASA1.0");
-        System.out.println(product.getName());
-        System.out.println("chuchamare " + product);
-        
+    public ResponseEntity<?> add(HttpEntity<String> httpEntity) throws JsonProcessingException {
+        String json = httpEntity.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        Product product = objectMapper.readValue(json, Product.class);
+
+        // Imprime el objeto Product para verificar
+        System.out.println("Producto recibido: " + product);
+
         try{
             Product response = productBusiness.add(product);
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -122,11 +133,78 @@ public class SAPRestController extends BaseRestController {
         }
     }
 
+//    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+//    @PostMapping("/product")
+//    public ResponseEntity<?> add(HttpEntity<String> httpEntity) {
+//        System.out.println(httpEntity.getBody());
+//        return new ResponseEntity<>(HttpStatus.CREATED);
+//    }
+
     @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
     @GetMapping("/orders/count")
     public ResponseEntity<?> count(){
         try {
             return new ResponseEntity<>(orderBusiness.countOrders(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/countClients")
+    public ResponseEntity<?> dashboardClientsAndOrdersFinished(){
+        try {
+            return new ResponseEntity<>(clientBusiness.countClients(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/orders/totalFinished")
+    public ResponseEntity<?> totalFinished(){
+        try {
+            return new ResponseEntity<>(orderBusiness.countOrders(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/orders/all-orders-count")
+    public ResponseEntity<?> allOrdersCount(){
+        try {
+            return new ResponseEntity<>(orderBusiness.countOrdersByMonth(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/orders/products-count")
+    public ResponseEntity<?> productsCount(){
+        try {
+            return new ResponseEntity<>(orderBusiness.countProducts(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/orders/count-all-clients")
+    public ResponseEntity<?> countAllClients(){
+        try {
+            return new ResponseEntity<>(orderBusiness.countAllClients(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/products")
+    public ResponseEntity<?> getProducts(){
+        try {
+            return new ResponseEntity<>(productBusiness.list(), HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

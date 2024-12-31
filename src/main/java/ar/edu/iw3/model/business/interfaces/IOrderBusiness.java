@@ -8,8 +8,7 @@ import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.exceptions.PasswordException;
 import ar.edu.iw3.model.business.exceptions.StateException;
 import ar.edu.iw3.model.business.exceptions.TruckloadException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-
+import org.springframework.data.domain.Page;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,17 @@ public interface IOrderBusiness {
 
     public Map<String, Object> countOrders() throws BusinessException;
 
+//    public Map<String, Object> countOrdersByState() throws BusinessException;
+
+    public List<Map<String, Object>> countProducts() throws BusinessException;
+
+    public List<Map<String, Object>> countAllClients() throws BusinessException;
+
+    public List<Map<String, Object>> countOrdersByMonth() throws BusinessException;
+
     public Order add(Order order) throws FoundException, BusinessException, NotFoundException;
+
+    public Page<Order> getOrders(int currentPage, Order.State state, int pageSize) throws BusinessException;
 
     public List<Order> list() throws BusinessException;
 
