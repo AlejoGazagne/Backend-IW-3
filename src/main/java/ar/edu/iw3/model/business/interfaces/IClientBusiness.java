@@ -5,6 +5,8 @@ import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 
+import java.util.Map;
+
 public interface IClientBusiness {
     public Client find(String externalId) throws NotFoundException, BusinessException;
 
@@ -15,4 +17,6 @@ public interface IClientBusiness {
     public Client update(Client client) throws FoundException, NotFoundException, BusinessException;
 
     public Client findOrCreate(Client client) throws BusinessException;
+
+    public Map<String, Object> countClients() throws BusinessException;
 }

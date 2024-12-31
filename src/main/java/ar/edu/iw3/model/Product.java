@@ -26,4 +26,13 @@ public class Product {
     @Column(nullable = false)
     @JsonProperty("limit_temperature")
     private float limitTemperature;
+
+    @Override
+    public String toString() {
+        return "Product {" +
+                "id=" + id +
+                ", name = '" + name + '\'' +
+                ", limitTemperature = " + limitTemperature +
+                '}';
+    }
 }

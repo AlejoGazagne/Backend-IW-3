@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -98,6 +99,16 @@ public class ClientBusiness implements IClientBusiness {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw BusinessException.builder().message("Error al crear Cliente.").build();
+        }
+    }
+
+    @Override
+    public Map<String, Object> countClients() throws BusinessException {
+        try {
+            return Map.of("totalClients", clientDAO.count());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
         }
     }
 }

@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,6 +38,16 @@ public class ProductBusiness implements IProductBusiness {
     }
 
     @Override
+    public List<Product> list() throws BusinessException {
+        try {
+            return productDAO.findAll();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Override
     public Product find(String product) throws NotFoundException, BusinessException {
         Optional<Product> p;
         try {
@@ -53,10 +65,6 @@ public class ProductBusiness implements IProductBusiness {
 
     @Override
     public Product add(Product product) throws FoundException, BusinessException {
-        System.out.println("AVER CHANGO QUE PASA");
-        System.out.println(product.getId());
-        System.out.println(product.getName());
-        System.out.println(product.getLimitTemperature());
         try {
             find(product.getName());
             throw FoundException.builder().message("Product exist, id = " + product.getId()).build();
