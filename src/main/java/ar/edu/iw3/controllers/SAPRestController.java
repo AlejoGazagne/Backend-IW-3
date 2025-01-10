@@ -1,18 +1,20 @@
 package ar.edu.iw3.controllers;
 
+import ar.edu.iw3.auth.IUserBusiness;
+import ar.edu.iw3.auth.User;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.Product;
-import ar.edu.iw3.model.business.ClientBusiness;
 import ar.edu.iw3.model.business.exceptions.*;
+import ar.edu.iw3.model.business.interfaces.IClientBusiness;
 import ar.edu.iw3.model.business.interfaces.IOrderBusiness;
 import ar.edu.iw3.model.business.interfaces.IProductBusiness;
 import ar.edu.iw3.util.IStandartResponseBusiness;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,8 +40,12 @@ public class SAPRestController extends BaseRestController {
 
     @Autowired
     private IProductBusiness productBusiness;
+
     @Autowired
-    private ClientBusiness clientBusiness;
+    private IClientBusiness clientBusiness;
+
+    @Autowired
+    private IUserBusiness userBusiness;
 
     @Operation(operationId = "CreateOrder", summary = "Crea una orden de carga")
     @Parameter(in = ParameterIn.DEFAULT, name = "order", description = "Orden de carga", required = true)
@@ -205,6 +211,31 @@ public class SAPRestController extends BaseRestController {
     public ResponseEntity<?> getProducts(){
         try {
             return new ResponseEntity<>(productBusiness.list(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_SAP') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<?> getUsers(){
+        try {
+            return new ResponseEntity<>(userBusiness.getAdminsAndOperators(), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/user")
+    public ResponseEntity<?> editUser(HttpEntity<String> httpEntity) throws JsonProcessingException {
+        String json = httpEntity.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(json);
+
+        try{
+            userBusiness.editUser(jsonNode);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -108,4 +108,18 @@ public class User implements UserDetails {
 		return authorities;
 	}
 
+	@Override
+	public String toString() {
+		return "User{" +
+				"accountNonExpired=" + accountNonExpired +
+				", accountNonLocked=" + accountNonLocked +
+				", credentialsNonExpired=" + credentialsNonExpired +
+				", enabled=" + enabled +
+				", email='" + email + '\'' +
+				", idUser=" + idUser +
+				", username='" + username + '\'' +
+				", password='" + password + '\'' +
+				", roles=" + roles +
+				'}';
+	}
 }
