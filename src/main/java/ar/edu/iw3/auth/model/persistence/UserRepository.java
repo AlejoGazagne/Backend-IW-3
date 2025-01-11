@@ -1,14 +1,15 @@
-package ar.edu.iw3.auth;
+package ar.edu.iw3.auth.model.persistence;
 
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.iw3.auth.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{ 
+public interface UserRepository extends JpaRepository<User, Long>{
 	public Optional<User> findOneByUsernameOrEmail(String username, String email);
 
 	@Query(value = "SELECT DISTINCT u.* FROM users u " +

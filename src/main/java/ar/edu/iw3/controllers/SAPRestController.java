@@ -1,7 +1,6 @@
 package ar.edu.iw3.controllers;
 
-import ar.edu.iw3.auth.IUserBusiness;
-import ar.edu.iw3.auth.User;
+import ar.edu.iw3.auth.model.business.interfaces.IUserBusiness;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.Product;
 import ar.edu.iw3.model.business.exceptions.*;
@@ -238,6 +237,23 @@ public class SAPRestController extends BaseRestController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (BusinessException e) {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/user")
+    public ResponseEntity<?> addUser(HttpEntity<String> httpEntity) throws JsonProcessingException {
+        String json = httpEntity.getBody();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(json);
+
+        try{
+            userBusiness.createUser(jsonNode);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (FoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
         }
     }
 }

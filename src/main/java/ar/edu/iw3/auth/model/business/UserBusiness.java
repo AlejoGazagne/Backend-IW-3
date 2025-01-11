@@ -1,10 +1,18 @@
-package ar.edu.iw3.auth;
+package ar.edu.iw3.auth.model.business;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import ar.edu.iw3.auth.Role;
+import ar.edu.iw3.auth.User;
+import ar.edu.iw3.auth.model.business.exceptions.BadPasswordException;
+import ar.edu.iw3.auth.model.business.interfaces.IUserBusiness;
+import ar.edu.iw3.auth.model.persistence.RoleRepository;
+import ar.edu.iw3.auth.model.persistence.UserRepository;
+import ar.edu.iw3.model.business.exceptions.FoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -97,10 +105,8 @@ public class UserBusiness implements IUserBusiness {
 	@Override
 	public void editUser(JsonNode jsonNode) throws BusinessException {
 		try {
-			System.out.println(jsonNode);
 			Long userId = jsonNode.get("id").asLong();
 			Optional<User> user = userDAO.findById(userId);
-			System.out.println(user);
 
 			if(user.isPresent()){
 				if (jsonNode.has("enabled")) {
@@ -135,6 +141,50 @@ public class UserBusiness implements IUserBusiness {
 			throw BusinessException.builder().ex(e).build();
 		}
 	}
+
+	@Autowired
+	@Lazy
+	private PasswordEncoder pEncoder;
+
+	public void createUser(JsonNode jsonNode) throws BusinessException {
+		System.out.println(jsonNode);
+		try {
+			String username = jsonNode.get("username").asText();
+			String email = jsonNode.get("email").asText();
+			String password = jsonNode.get("password").asText();
+			boolean enabled = jsonNode.get("enabled").asBoolean();
+
+			if(userDAO.findOneByUsernameOrEmail(username, email).isPresent()) {
+				throw FoundException.builder().message("User already exists").build();
+			}
+
+			Set<Role> roles = new HashSet<>();
+			jsonNode.get("roles").forEach(roleNode -> {
+				String roleName = roleNode.asText();
+                Role role = null;
+                try {
+                    role = roleDAO.findByName(roleName)
+                            .orElseThrow(() -> new BusinessException("Role not found: " + roleName));
+                } catch (BusinessException e) {
+                    throw new RuntimeException(e);
+                }
+                roles.add(role);
+			});
+
+			User user = new User();
+			user.setUsername(username);
+			user.setEmail(email);
+			user.setPassword(pEncoder.encode(password));
+			user.setRoles(roles);
+			user.setEnabled(enabled);
+
+			userDAO.save(user);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw BusinessException.builder().ex(e).build();
+		}
+	}
+
 
 }
 

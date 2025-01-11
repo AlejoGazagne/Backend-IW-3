@@ -1,5 +1,8 @@
-package ar.edu.iw3.auth;
+package ar.edu.iw3.auth.model.business.interfaces;
 
+import ar.edu.iw3.auth.User;
+import ar.edu.iw3.auth.model.business.exceptions.BadPasswordException;
+import ar.edu.iw3.model.business.exceptions.FoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -22,5 +25,7 @@ public interface IUserBusiness {
 	public List<Map<String, Object>>  getAdminsAndOperators() throws BusinessException;
 
 	public void editUser(JsonNode jsonNode) throws BusinessException;
+
+	public void createUser(JsonNode jsonNode) throws BusinessException, FoundException;
 
 }

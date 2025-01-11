@@ -77,6 +77,7 @@ public class AuthRestController extends BaseRestController {
 		Map<String, Object> responseData = new HashMap<>();
 		responseData.put("id", user.getIdUser());
 		responseData.put("username", user.getUsername());
+		responseData.put("email", user.getEmail());
 		responseData.put("roles", user.getAuthoritiesStr());
 		responseData.put("token", token);
 
