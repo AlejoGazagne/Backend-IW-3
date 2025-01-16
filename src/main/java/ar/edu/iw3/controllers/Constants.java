@@ -12,4 +12,9 @@ public final class Constants {
 
 	public static final String URL_LOGIN = URL_BASE + "/login";
 
+	public static final String URL_ORDERS = URL_BASE + "/orders";
+	public static final String URL_PRODUCTS = URL_BASE + "/products";
+	public static final String URL_USERS = URL_BASE + "/users";
+	public static final String URL_CLIENTS = URL_BASE + "/clients";
+
 }

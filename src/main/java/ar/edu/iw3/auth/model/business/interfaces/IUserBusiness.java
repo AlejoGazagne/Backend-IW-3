@@ -15,7 +15,7 @@ import java.util.Map;
 public interface IUserBusiness {
 	public User load(String usernameOrEmail) throws NotFoundException, BusinessException;
 
-	public void changePassword(String usernameOrEmail, String oldPassword, String newPassword, PasswordEncoder pEncoder)
+	public void changePassword(long id, String oldPassword, String newPassword, PasswordEncoder pEncoder)
 			throws BadPasswordException, NotFoundException, BusinessException;
 
 	public void disable(String usernameOrEmail) throws NotFoundException, BusinessException;
@@ -28,4 +28,5 @@ public interface IUserBusiness {
 
 	public void createUser(JsonNode jsonNode) throws BusinessException, FoundException;
 
+	public Map<String, Object> changeUser(JsonNode jsonNode) throws BusinessException, NotFoundException, BadPasswordException;
 }

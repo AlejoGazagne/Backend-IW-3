@@ -405,10 +405,11 @@ public class OrderBusiness implements IOrderBusiness {
         String[] months = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
 
         try {
+            LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
             for (int i = 0; i < months.length; i++) {
                 Map<String, Object> monthData = new HashMap<>();
                 monthData.put("month", months[i]);
-                monthData.put("count", orderDAO.countOrderByDateReceived(i + 1));
+                monthData.put("count", orderDAO.countOrderByDateReceivedAndYear(i + 1, oneYearAgo));
                 response.add(monthData);
             }
             return response;

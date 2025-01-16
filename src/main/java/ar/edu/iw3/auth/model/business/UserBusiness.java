@@ -11,6 +11,7 @@ import ar.edu.iw3.auth.model.persistence.RoleRepository;
 import ar.edu.iw3.auth.model.persistence.UserRepository;
 import ar.edu.iw3.model.business.exceptions.FoundException;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,12 +48,20 @@ public class UserBusiness implements IUserBusiness {
 	}
 
 	@Override
-	public void changePassword(String usernameOrEmail, String oldPassword, String newPassword, PasswordEncoder pEncoder)
+	public void changePassword(long id, String oldPassword, String newPassword, PasswordEncoder pEncoder)
 			throws BadPasswordException, NotFoundException, BusinessException {
-		User user = load(usernameOrEmail);
+		Optional<User> userOptional = userDAO.findById(id);
+
+		if (userOptional.isEmpty()) {
+			throw NotFoundException.builder().message("User not found").build();
+		}
+
+		User user = userOptional.get();
+
 		if (!pEncoder.matches(oldPassword, user.getPassword())) {
 			throw BadPasswordException.builder().build();
 		}
+
 		user.setPassword(pEncoder.encode(newPassword));
 		try {
 			userDAO.save(user);
@@ -185,6 +194,53 @@ public class UserBusiness implements IUserBusiness {
 		}
 	}
 
+	@Override
+	public Map<String, Object> changeUser(JsonNode jsonNode) throws BusinessException, NotFoundException, BadPasswordException {
+		try {
+			System.out.println(jsonNode);
+			Long userId = jsonNode.get("id").asLong();
+			Optional<User> userOptional = userDAO.findById(userId);
+
+			if (userOptional.isEmpty()) {
+				throw NotFoundException.builder().message("User not found").build();
+			}
+
+			System.out.println(userOptional.get());
+
+			User user = userOptional.get();
+
+			if (jsonNode.has("mail") && !jsonNode.get("mail").asText().isEmpty()) {
+				user.setEmail(jsonNode.get("mail").asText());
+			}
+
+			if (jsonNode.has("name") && !jsonNode.get("name").asText().isEmpty()) {
+				user.setUsername(jsonNode.get("name").asText());
+			}
+
+			if (jsonNode.has("currentPassword") && jsonNode.has("newPassword") &&
+					!jsonNode.get("currentPassword").asText().isEmpty() && !jsonNode.get("newPassword").asText().isEmpty()) {
+				changePassword(user.getIdUser(), jsonNode.get("currentPassword").asText(), jsonNode.get("newPassword").asText(), pEncoder);
+			}
+
+			userDAO.save(user);
+
+			// Create a map to hold the response data
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("id", user.getIdUser());
+			responseData.put("name", user.getUsername());
+			responseData.put("mail", user.getEmail());
+			responseData.put("roles", user.getAuthoritiesStr());
+			responseData.put("enabled", user.isEnabled());
+
+			return responseData;
+		} catch (BadPasswordException e){
+			throw BadPasswordException.builder().build();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw BusinessException.builder().ex(e).build();
+		}
+
+	}
 
 }
 
