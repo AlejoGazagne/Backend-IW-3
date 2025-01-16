@@ -15,7 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import ar.edu.iw3.auth.IUserBusiness;
+import ar.edu.iw3.auth.model.business.interfaces.IUserBusiness;
 import ar.edu.iw3.auth.User;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;

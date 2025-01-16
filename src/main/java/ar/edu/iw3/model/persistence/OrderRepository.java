@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("select count(o) from Order o where month(o.dateReceived) = :month")
     public Integer countOrderByDateReceived(@Param("month") int month);
+
+    @Query("select count(o) from Order o where month(o.dateReceived) = :month and o.dateReceived >= :oneYearAgo")
+    public Integer countOrderByDateReceivedAndYear(@Param("month") int month, @Param("oneYearAgo") LocalDateTime oneYearAgo);
 
     @Query(value = "SELECT p.name AS productName, COUNT(o.id) AS orderCount " +
             "FROM products p " +

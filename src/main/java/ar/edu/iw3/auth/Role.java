@@ -29,4 +29,14 @@ public class Role implements Serializable {
 	private int id;
 	@Column(unique = true, nullable = false)
 	private String name;
+
+	@Override
+	public String toString() {
+		return "Role{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", description='" + description + '\'' +
+				'}';
+	}
+	
 }
