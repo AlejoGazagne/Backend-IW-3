@@ -1,4 +1,4 @@
-package ar.edu.iw3.websocket;
+package ar.edu.iw3.websockets;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
