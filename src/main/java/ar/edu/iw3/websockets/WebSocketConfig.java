@@ -14,11 +14,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
     }
-    
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/realtime-truck-load");
-        registry.addEndpoint("/realtime-truck-load").withSockJS();
+        registry.addEndpoint("/realtime-truck-load")
+                .setAllowedOrigins("*"); // Permitir cualquier origen
+
+        registry.addEndpoint("/realtime-truck-load")
+                .setAllowedOrigins("*")
+                .withSockJS(); // Habilitar SockJS para compatibilidad
 
     }
 }

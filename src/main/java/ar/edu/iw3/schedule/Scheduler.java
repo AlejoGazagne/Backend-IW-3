@@ -9,6 +9,7 @@ import ar.edu.iw3.websockets.wrappers.AlarmWsWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +26,8 @@ public class Scheduler {
 
     @Autowired
     private SimpMessagingTemplate wSock;
+    @Autowired
+    private AbstractSubscribableChannel clientOutboundChannel;
 
     // Recordatorio de alarmas sin aceptar para clientes de la aplicacion front
     @Scheduled(fixedDelay = 10, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
@@ -38,6 +41,7 @@ public class Scheduler {
                 AlarmWsWrapper alarmWsWrapper = getAlarmWsWrapper(alarm);
 
                 try {
+                    System.out.println("Sending reminder for alarm id=" + alarm.getId());
                     wSock.convertAndSend("/topic/alarms/reminders", alarmWsWrapper);
                 } catch (Exception e) {
                     log.error("Failed to send alert notification for alarm id={}", alarm.getId(), e);

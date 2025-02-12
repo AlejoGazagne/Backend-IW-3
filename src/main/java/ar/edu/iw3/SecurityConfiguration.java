@@ -14,6 +14,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -32,22 +34,43 @@ public class SecurityConfiguration {
 		return new BCryptPasswordEncoder();
 	}
 
+	@Autowired
+	private IUserBusiness userBusiness;
+
 	@Bean
-	WebMvcConfigurer corsConfigurer() {
+	public AccessDeniedHandler accessDeniedHandler() {
+		return new AccessDeniedHandlerImpl();
+	}
+
+//	@Bean
+//	WebMvcConfigurer corsConfigurer() {
+//		return new WebMvcConfigurer() {
+//			@Override
+//			public void addCorsMappings(CorsRegistry registry) {
+//				registry.addMapping("/**").allowedMethods("*").allowedHeaders("*").allowedOrigins("*");
+//			}
+//		};
+//	}
+
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedMethods("*").allowedHeaders("*").allowedOrigins("*");
+				registry.addMapping("/**")
+						.allowedOrigins("http://localhost:5173")
+						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+						.allowedHeaders("*")
+						.allowCredentials(true);
 			}
 		};
 	}
-	@Autowired
-	private IUserBusiness userBusiness;
+
+
 	@Bean
 	AuthenticationManager authenticationManager() {
 		return new CustomAuthenticationManager(bCryptPasswordEncoder(), userBusiness);
 	}
-
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -56,19 +79,17 @@ public class SecurityConfiguration {
 
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.authorizeHttpRequests(auth -> auth
-//				.anyRequest().permitAll());
-				.requestMatchers(HttpMethod.POST, Constants.URL_LOGIN).permitAll()
-				.requestMatchers("/v3/api-docs/**").permitAll()
-				.requestMatchers("/swagger-ui.html").permitAll()
-				.requestMatchers("/swagger-ui/**").permitAll()
-				.requestMatchers("/ui/**").permitAll()
-				.requestMatchers("/demo/**").permitAll()
-				.anyRequest().authenticated());
+						.requestMatchers(HttpMethod.POST, Constants.URL_LOGIN).permitAll()
+						.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/ui/**", "/demo/**").permitAll()
+						.requestMatchers("/realtime-truck-load/**").permitAll() // Permitir WebSocket
+						.anyRequest().authenticated())
+				.exceptionHandling(e -> e.accessDeniedHandler(accessDeniedHandler()));
 
 		http.httpBasic(Customizer.withDefaults())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.addFilter(new JWTAuthorizationFilter(authenticationManager()));
+
 		return http.build();
 	}
 }
