@@ -7,6 +7,7 @@ import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.interfaces.ILoadDataBusiness;
 import ar.edu.iw3.model.persistence.LoadDataRepository;
+import ar.edu.iw3.websockets.wrappers.LoadDataWsWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -107,21 +108,41 @@ public class LoadDataBusiness implements ILoadDataBusiness {
             Date dateFinalCharge = order.getDateFinalCharge();
             if (checkFrequency(currentTime, dateFinalCharge)){
                 loadData.setTimestampLoad(currentTime);
+                loadData.setExternalId(order.getExternalId());
+                
                 add(loadData);
                 order.setDateFinalCharge(currentTime);
+                
+                LoadDataWsWrapper loadDataWsWrapper = getLoadDataWsWrapper(loadData);
 
-                //truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+                truckLoadws.convertAndSend("/topic/loadTruck/data", loadDataWsWrapper);
             }
 
         }else{
             loadData.setTimestampLoad(currentTime);
             loadData.setOrder(order);
+            loadData.setExternalId(order.getExternalId());
+
             add(loadData);
             order.setDateFinalCharge(currentTime);
-            //truckLoadws.convertAndSend("/topic/load-truck/data", loadData);
+
+            LoadDataWsWrapper loadDataWsWrapper = getLoadDataWsWrapper(loadData);
+            truckLoadws.convertAndSend("/topic/loadTruck/data", loadDataWsWrapper);
         }
 
         return order;
+    }
+    
+    private static LoadDataWsWrapper getLoadDataWsWrapper(LoadData loadData) {
+        LoadDataWsWrapper loadDataWsWrapper = new LoadDataWsWrapper();
+        loadDataWsWrapper.setId(loadData.getId());
+        loadDataWsWrapper.setAccumulatedMass(loadData.getAccumulatedMass());
+        loadDataWsWrapper.setDensity(loadData.getDensity());
+        loadDataWsWrapper.setTemperature(loadData.getTemperature());
+        loadDataWsWrapper.setCaudal(loadData.getCaudal());
+        loadDataWsWrapper.setTimestampLoad(loadData.getTimestampLoad());
+        loadDataWsWrapper.setOrderId(loadData.getOrder().getId());
+        return loadDataWsWrapper;
     }
 
     private static final long FREQUENCY_MS = 5000;

@@ -15,6 +15,8 @@ import java.util.Map;
 public interface IOrderBusiness {
     public Order find(String externalId) throws NotFoundException, BusinessException;
 
+    public Order findInternal(long internalId) throws NotFoundException, BusinessException;
+
     public Map<String, Object> getDetailsOrder(String externalId) throws NotFoundException, BusinessException, StateException;
 
     public Map<String, Object> countOrders() throws BusinessException;

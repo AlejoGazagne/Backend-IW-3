@@ -16,6 +16,10 @@ public interface IAlarmBusiness {
 
     public Alarm add(Alarm alarm) throws BusinessException, FoundException;
 
+    public Alarm find(Long id) throws BusinessException, NotFoundException;
+
+    public Boolean isAlarmAccepted(Long id);
+
     public Alarm find(Long id) throws BusinessException;
 
     public void updateAlarmStatus(Long id, Alarm.State status) throws BusinessException, NotFoundException;
