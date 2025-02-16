@@ -30,11 +30,9 @@ public class Scheduler {
     private AbstractSubscribableChannel clientOutboundChannel;
 
     // Recordatorio de alarmas sin aceptar para clientes de la aplicacion front
-    @Scheduled(fixedDelay = 99999, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 1000000000, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void alarmReminder() {
-
         try {
-            //System.out.println("------------------------------------------ Probando");
             List<Alarm> alarms = alarmBusiness.pendingAlarms();
             for (Alarm alarm : alarms) {
 
@@ -57,9 +55,11 @@ public class Scheduler {
         AlarmWsWrapper alarmWsWrapper = new AlarmWsWrapper();
         alarmWsWrapper.setId(alarm.getId());
         alarmWsWrapper.setOrderId(alarm.getOrder().getId());
+        alarmWsWrapper.setProductName(alarm.getOrder().getProduct().getName());
         alarmWsWrapper.setStatus(alarm.getStatus());
+        alarmWsWrapper.setLimitTemperature(alarm.getOrder().getProduct().getLimitTemperature());
         alarmWsWrapper.setTemperature(alarm.getTemperature());
-        alarmWsWrapper.setDateOcurrence(alarm.getDateOcurrence());
+        alarmWsWrapper.setDateOccurrence(alarm.getDateOccurrence());
         alarmWsWrapper.setObservation(alarm.getDescription() != null ? alarm.getDescription() : null);
         alarmWsWrapper.setUser(
                 alarm.getUser() != null && alarm.getUser().getUsername() != null

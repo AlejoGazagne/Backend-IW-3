@@ -45,7 +45,7 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
         Alarm alarm = new Alarm();
         Alarm alarmAdded = new Alarm();
         alarm.setOrder(detail.getOrder());
-        alarm.setDateOcurrence(currentDay);
+        alarm.setDateOccurrence(currentDay);
         alarm.setTemperature(detail.getTemperature());
         alarm.setStatus(Alarm.State.PENDING);
 

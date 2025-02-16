@@ -298,6 +298,7 @@ public class OrderBusiness implements IOrderBusiness {
             conciliation.put("avgTemperature", loadDataBusiness.avgTemperature(order.getId()));
             conciliation.put("avgDensity", loadDataBusiness.avgDensity(order.getId()));
             conciliation.put("avgCaudal", loadDataBusiness.avgCaudal(order.getId()));
+
             return conciliation;
         } catch(NotFoundException e){
             log.error(e.getMessage());
@@ -438,7 +439,12 @@ public class OrderBusiness implements IOrderBusiness {
             throw StateException.builder().message("This order is not compatible with the closing operation.").build();
         }
         order.get().setState(Order.State.CHARGED);
-        orderDAO.save(order.get()); // TODO: si esto falla, no me tira un BusinessException
+        try {
+            orderDAO.save(order.get());
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw BusinessException.builder().ex(e).build();
+        }
     }
 
     @Override
