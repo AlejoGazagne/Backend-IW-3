@@ -7,7 +7,6 @@ import java.util.Set;
 import ar.edu.iw3.auth.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +23,8 @@ public class Alarm {
 
     public enum State{
         PENDING,
-        RESOLVED
+        NOT_RESOLVED,
+        RESOLVED,
     }
 
     @Id
@@ -33,7 +33,7 @@ public class Alarm {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
-    private Date dateOcurrence;
+    private Date dateOccurrence;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column()
@@ -58,4 +58,17 @@ public class Alarm {
     @JoinColumn(name = "id_user")
     private User user;
 
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "id=" + id +
+                ", dateOccurrence=" + dateOccurrence +
+                ", dateResolved=" + dateResolved +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", temperature=" + temperature +
+                ", orderId=" + (order != null ? order.getId() : null) +
+                ", userId=" + (user != null ? user.getIdUser() : null) +
+                '}';
+    }
 }

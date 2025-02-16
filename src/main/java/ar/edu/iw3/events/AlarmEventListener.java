@@ -33,7 +33,7 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
         // Guardado de alerta en db
         Alarm alarm = new Alarm();
         alarm.setOrder(detail.getOrder());
-        alarm.setDateOcurrence(currentDay);
+        alarm.setDateOccurrence(currentDay);
         alarm.setTemperature(detail.getTemperature());
         alarm.setStatus(Alarm.State.PENDING);
 

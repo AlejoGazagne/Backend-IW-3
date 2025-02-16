@@ -16,8 +16,8 @@ public class AlarmWsWrapper {
     private float temperature;
     private String observation;
     private Date dateResolved;
-    private Date dateOcurrence;
+    private Date dateOccurrence;
     private String user;
     private float limitTemperature;
-
+    private String productName;
 }
