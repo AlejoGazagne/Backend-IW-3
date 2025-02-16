@@ -4,11 +4,11 @@ import ar.edu.iw3.model.Alarm;
 import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.business.exceptions.BusinessException;
 import ar.edu.iw3.model.business.exceptions.FoundException;
-import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.interfaces.IAlarmBusiness;
 import ar.edu.iw3.websockets.wrappers.AlarmWsWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,14 +29,15 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
     @Override
     public void onApplicationEvent(AlarmEvent event) {
         if (event.getTypeEvent().equals(AlarmEvent.TypeEvent.TEMPERATURE_EXCEEDED) && event.getSource() instanceof LoadData) {
-            
             handleTemperatureExceeded((LoadData) event.getSource());
-            
         }
     }
 
     @Autowired
     private SimpMessagingTemplate alarmWs;
+
+    @Value("${mail.to.send.for.exceeded.temperature}")
+    private String mailToSend;
 
     private void handleTemperatureExceeded(LoadData detail) {
         Date currentDay = new Date(System.currentTimeMillis());
@@ -50,8 +51,6 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
         alarm.setStatus(Alarm.State.PENDING);
 
         try {
-            System.out.println("sexo33");
-            System.out.println(alarm);
             alarmAdded = alarmBusiness.add(alarm);
         } catch (BusinessException | FoundException e) {
             log.error(e.getMessage(), e);
@@ -62,7 +61,7 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
         alarmWsWrapper.setId(alarmAdded.getId());
         alarmWsWrapper.setTemperature(alarmAdded.getTemperature());
         alarmWsWrapper.setOrderId(alarmAdded.getOrder().getId());
-        alarmWsWrapper.setDateOcurrence(alarmAdded.getDateOcurrence());
+        alarmWsWrapper.setDateOccurrence(alarmAdded.getDateOccurrence());
         alarmWsWrapper.setStatus(alarmAdded.getStatus());
         alarmWsWrapper.setObservation(alarmAdded.getDescription() != null ? alarmAdded.getDescription() : null);
         alarmWsWrapper.setUser(alarmAdded.getUser() != null && alarmAdded.getUser().getUsername() != null ? alarmAdded.getUser().getUsername() : null);
@@ -94,16 +93,15 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
                         Sistema de Monitoreo de Carga""",
                 detail.getOrder().getId(),
                 detail.getOrder().getId(),
-                alarm.getDateOcurrence(),
+                alarm.getDateOccurrence(),
                 detail.getTemperature(),
                 detail.getAccumulatedMass(),
                 detail.getDensity(),
                 detail.getCaudal()
         );
-        String to = "arhetonto@gmail.com";
 
         try {
-            sendMailMessage(to, subject, message);
+            sendMailMessage(mailToSend, subject, message);
         } catch (BusinessException e) {
             System.out.println(e.getMessage());
         }
@@ -116,7 +114,6 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
 
     private void sendMailMessage(String to, String subject, String message) throws BusinessException{
         String from = "gasmonitor@gmail.com";
-        System.out.println("a dios le pido que el mail ande");
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(from);

@@ -20,7 +20,7 @@ public interface IAlarmBusiness {
 
     public Boolean isAlarmAccepted(Long id);
 
-    public Alarm find(Long id) throws BusinessException;
+    //public Alarm find(Long id) throws BusinessException;
 
     public void updateAlarmStatus(Long id, Alarm.State status) throws BusinessException, NotFoundException;
 

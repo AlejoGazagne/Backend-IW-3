@@ -1,8 +1,6 @@
 package ar.edu.iw3.model;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import ar.edu.iw3.auth.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
