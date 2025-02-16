@@ -1,5 +1,6 @@
 package ar.edu.iw3.model.business;
 
+import ar.edu.iw3.events.AlarmEvent;
 import ar.edu.iw3.model.LoadData;
 import ar.edu.iw3.model.Order;
 import ar.edu.iw3.model.business.exceptions.*;
@@ -8,9 +9,12 @@ import ar.edu.iw3.model.deserializers.OrderJsonDeserializer;
 import ar.edu.iw3.model.persistence.OrderRepository;
 import ar.edu.iw3.util.JsonUtiles;
 import ar.edu.iw3.util.PdfService;
+import ar.edu.iw3.websockets.wrappers.LoadDataWsWrapper;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +48,22 @@ public class OrderBusiness implements IOrderBusiness {
 
         if(order.isEmpty()) {
             throw NotFoundException.builder().message("Order not found, id = " + externalId).build();
+        }
+        return order.get();
+    }
+
+    @Override
+    public Order findInternal(long internalId) throws NotFoundException, BusinessException {
+        Optional<Order> order;
+        try {
+            order = orderDAO.findById(internalId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+
+        if(order.isEmpty()) {
+            throw NotFoundException.builder().message("Order not found, id = " + internalId).build();
         }
         return order.get();
     }
@@ -333,6 +353,13 @@ public class OrderBusiness implements IOrderBusiness {
     @Autowired
     private SimpMessagingTemplate loadTruckWS;
 
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private IAlarmBusiness alarmBusiness;
+
     public Order beginTruckLoading(long id, LoadData loadData) throws BusinessException, NotFoundException, StateException, TruckloadException, FoundException {
         Optional<Order> tmp = orderDAO.findById(id);
 
@@ -352,9 +379,12 @@ public class OrderBusiness implements IOrderBusiness {
             throw TruckloadException.builder().message("Error: amount of liquid mass is invalid.").build();
         }
 
-        /*if(loadData.getTemperature() > order.getProduct().getLimitTemperature()){
-            HACER LOGICA DE ALARMA
-        }*/
+        
+        if(loadData.getTemperature() > order.getProduct().getLimitTemperature()){
+            if(!alarmBusiness.isAlarmAccepted(order.getId())){
+                eventPublisher.publishEvent(new AlarmEvent(loadData, AlarmEvent.TypeEvent.TEMPERATURE_EXCEEDED));
+            }
+        }
 
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         if(order.getDateInitialCharge() == null){
@@ -375,10 +405,22 @@ public class OrderBusiness implements IOrderBusiness {
         order.setLastTemperature(loadData.getTemperature());
 
         order = loadDataBusiness.createLoadData(currentTime, loadData, order);
-        
+        //System.out.println("aber que pingo pasa aca");
+        //System.out.println(order);
         orderDAO.save(order);
+        LoadDataWsWrapper loadDataWsWrapper = new LoadDataWsWrapper();
 
-        //loadTruckWS.convertAndSend("/topic/loadTruck", order);
+        loadDataWsWrapper.setId(order.getId());
+        loadDataWsWrapper.setAccumulatedMass(loadData.getAccumulatedMass());
+        loadDataWsWrapper.setDensity(loadData.getDensity());
+        loadDataWsWrapper.setTemperature(loadData.getTemperature());
+        loadDataWsWrapper.setCaudal(loadData.getCaudal());
+        loadDataWsWrapper.setTimestampLoad(currentTime);
+        loadDataWsWrapper.setOrderId(order.getId());
+        loadDataWsWrapper.setExternalId(order.getExternalId());
+        System.out.println("sexo8:");
+        System.out.println(loadDataWsWrapper.getExternalId());
+        loadTruckWS.convertAndSend("/topic/loadTruck", loadDataWsWrapper);
         return order;
 
     }

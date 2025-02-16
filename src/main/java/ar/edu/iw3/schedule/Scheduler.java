@@ -30,18 +30,18 @@ public class Scheduler {
     private AbstractSubscribableChannel clientOutboundChannel;
 
     // Recordatorio de alarmas sin aceptar para clientes de la aplicacion front
-    @Scheduled(fixedDelay = 10, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 99999, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void alarmReminder() {
 
         try {
-            System.out.println("------------------------------------------ Probando");
+            //System.out.println("------------------------------------------ Probando");
             List<Alarm> alarms = alarmBusiness.pendingAlarms();
             for (Alarm alarm : alarms) {
 
                 AlarmWsWrapper alarmWsWrapper = getAlarmWsWrapper(alarm);
 
                 try {
-                    System.out.println("Sending reminder for alarm id=" + alarm.getId());
+                    //System.out.println("Sending reminder for alarm id=" + alarm.getId());
                     wSock.convertAndSend("/topic/alarms/reminders", alarmWsWrapper);
                 } catch (Exception e) {
                     log.error("Failed to send alert notification for alarm id={}", alarm.getId(), e);

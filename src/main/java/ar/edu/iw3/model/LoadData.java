@@ -41,4 +41,8 @@ public class LoadData {
     @JoinColumn(name = "id_order", nullable = false)
     @JsonBackReference
     private Order order;
+    
+    @Column(nullable = false)
+    private String externalId;
+
 }
