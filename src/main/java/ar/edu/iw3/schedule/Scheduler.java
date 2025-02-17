@@ -30,7 +30,7 @@ public class Scheduler {
     private AbstractSubscribableChannel clientOutboundChannel;
 
     // Recordatorio de alarmas sin aceptar para clientes de la aplicacion front
-    @Scheduled(fixedDelay = 10, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = 1000000000, initialDelay = 1, timeUnit = TimeUnit.SECONDS)
     public void alarmReminder() {
         try {
             List<Alarm> alarms = alarmBusiness.pendingAlarms();

@@ -72,4 +72,17 @@ public class AlarmRestController {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasRole('ROLE_ADMIN')")
+    @GetMapping("/order/{externalIdOrder}")
+    public ResponseEntity<?> getAlarmsByOrder(@PathVariable String externalIdOrder) {
+        try {
+            System.out.println("externalIdOrder: " + externalIdOrder);
+            return new ResponseEntity<>(alarmBusiness.getAlarmsByOrder(externalIdOrder), HttpStatus.OK);
+        } catch (BusinessException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+        }
+    }
 }

@@ -12,10 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,14 +34,17 @@ public class ConciliationRestController extends BaseRestController {
             @ApiResponse(responseCode = "409", description = "La orden no se encuentra en estado de conciliación"),
             @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SAP') or hasRole('ROLE_WEIGHING') or hasRole('ROLE_CHARGING_SYSTEM')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SAP') or hasRole('ROLE_WEIGHING') or hasRole('ROLE_CHARGING_SYSTEM') or hasRole('ROLE_OPERATOR')")
     @GetMapping("/order/{externalOrderId}")
     public ResponseEntity<byte[]> conciliation(@PathVariable String externalOrderId){
         try {
+            System.out.println("externalOrderId: " + externalOrderId);
             byte[] pdf = orderBusiness.conciliationPdf(externalOrderId);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "conciliation-order" + externalOrderId + ".pdf");
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename("conciliation-order-" + externalOrderId + ".pdf")
+                    .build());
             return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
         } catch (BusinessException e) {
             String errorMessage = e.getMessage();

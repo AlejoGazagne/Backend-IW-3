@@ -10,6 +10,7 @@ import ar.edu.iw3.model.business.exceptions.FoundException;
 import ar.edu.iw3.model.business.exceptions.NotFoundException;
 import ar.edu.iw3.model.business.interfaces.IAlarmBusiness;
 import ar.edu.iw3.model.persistence.AlarmRepository;
+import ar.edu.iw3.model.persistence.OrderRepository;
 import ar.edu.iw3.model.persistence.ProductRepository;
 import ar.edu.iw3.model.serializers.AlarmJsonSerializer;
 import org.springframework.data.domain.PageImpl;
@@ -219,6 +220,50 @@ public class AlarmBusiness implements IAlarmBusiness {
             }
 
             System.out.println(response);
+            return response;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+    }
+
+    @Autowired
+    private OrderRepository orderDAO;
+
+    public List<Map<String, Object>> getAlarmsByOrder(String externalIdOrder) throws BusinessException, NotFoundException {
+        try {
+            Optional<Order> order = orderDAO.findByExternalId(externalIdOrder);
+            if (order.isEmpty()) {
+                throw new NotFoundException("No order found with externalId = " + externalIdOrder);
+            }
+
+            List<Alarm> alarms = alarmDAO.findByOrder(order.get());
+            List<Map<String, Object>> response = new ArrayList<>();
+
+            for (Alarm alarm : alarms) {
+                Map<String, Object> alarmData = new HashMap<>();
+                alarmData.put("id", alarm.getId());
+
+                if (alarm.getDescription() != null) {
+                    alarmData.put("observation", alarm.getDescription());
+                }
+
+                alarmData.put("dateOccurrence", alarm.getDateOccurrence());
+
+                if (alarm.getDateResolved() != null) {
+                    alarmData.put("dateResolved", alarm.getDateResolved());
+                }
+
+                alarmData.put("status", alarm.getStatus());
+
+                alarmData.put("temperature", alarm.getTemperature());
+
+                if (alarm.getUser() != null && alarm.getUser().getUsername() != null) {
+                    alarmData.put("userName", alarm.getUser().getUsername());
+                }
+                response.add(alarmData);
+            }
+
             return response;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

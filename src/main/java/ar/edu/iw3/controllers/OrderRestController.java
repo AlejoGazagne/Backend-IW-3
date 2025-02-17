@@ -114,4 +114,16 @@ public class OrderRestController extends BaseRestController {
             return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+//    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasRole('ROLE_ADMIN')")
+//    @GetMapping("/alarms/{externalId}")
+//    public ResponseEntity<?> alarms(@PathVariable String externalId){
+//        try {
+//            return new ResponseEntity<>(orderBusiness.getOrderAlarms(externalId), HttpStatus.OK);
+//        } catch (BusinessException e) {
+//            return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+//        } catch (NotFoundException e) {
+//            return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+//        }
+//    }
 }

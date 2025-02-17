@@ -105,8 +105,6 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
         } catch (BusinessException e) {
             System.out.println(e.getMessage());
         }
-        System.out.println("PROBANDO MAIL");
-        System.out.println(message);
     }
     
     @Autowired 
