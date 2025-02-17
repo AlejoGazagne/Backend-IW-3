@@ -2,6 +2,7 @@ package ar.edu.iw3.model.persistence;
 
 import ar.edu.iw3.model.Alarm;
 import ar.edu.iw3.model.Alarm.State;
+import ar.edu.iw3.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
@@ -30,4 +31,5 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     @Query("select count(a) from Alarm a where month(a.dateOccurrence) = :month and a.order.product.id = :productId")
     Integer countByProductAndMonth(@Param("productId") Long productId, @Param("month") int month);
 
+    List<Alarm> findByOrder(Order order);
 }

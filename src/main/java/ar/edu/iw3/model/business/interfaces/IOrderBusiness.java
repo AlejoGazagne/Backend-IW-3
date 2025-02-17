@@ -55,4 +55,6 @@ public interface IOrderBusiness {
 
     public void finishTruckLoading(long orderId) throws BusinessException, NotFoundException, StateException;
 
+//    public Map<String, Object> getOrderAlarms(String externalId) throws BusinessException, NotFoundException;
+
 }

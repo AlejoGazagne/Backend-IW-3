@@ -33,4 +33,6 @@ public interface IAlarmBusiness {
     public List<Map<String, Object>> countAlarmsByMonth() throws BusinessException;
 
     public List<Map<String, Object>> countAlarmsByMonthAndProduct() throws BusinessException;
+
+    public List<Map<String, Object>> getAlarmsByOrder(String externalIdOrder) throws BusinessException, NotFoundException;
 }
