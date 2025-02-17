@@ -66,8 +66,6 @@ public class AlarmBusiness implements IAlarmBusiness {
 
     @Override
     public List<Alarm> pendingAlarms() throws BusinessException {
-        System.out.println("sexo98");
-        System.out.println(alarmDAO);
         try {
             Optional<List<Alarm>> alarm = alarmDAO.findByStatus(Alarm.State.PENDING);
             if (alarm.isEmpty()) {
