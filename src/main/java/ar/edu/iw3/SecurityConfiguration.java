@@ -58,7 +58,7 @@ public class SecurityConfiguration {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("*")
+						.allowedOrigins("http://localhost:5173")
 						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
 						.allowedHeaders("*")
 						.allowCredentials(true);
@@ -77,7 +77,8 @@ public class SecurityConfiguration {
 		// CORS: https://developer.mozilla.org/es/docs/Web/HTTP/CORS
 		// CSRF: https://developer.mozilla.org/es/docs/Glossary/CSRF
 
-		http.csrf(AbstractHttpConfigurer::disable);
+		http.csrf(AbstractHttpConfigurer::disable)
+				.cors(Customizer.withDefaults());
 		http.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.POST, Constants.URL_LOGIN).permitAll()
 						.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/ui/**", "/demo/**").permitAll()
