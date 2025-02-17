@@ -81,6 +81,7 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
                         Orden ID: %s
                         Fecha/Hora del Evento: %s
                         Temperatura Registrada: %.2f °C
+                        Temperatura Límite: %.2f °C
                         Masa Acumulada: %.2f kg
                         Densidad: %.2f kg/m³
                         Caudal: %.2f Kg/h
@@ -95,6 +96,7 @@ public class AlarmEventListener implements ApplicationListener<AlarmEvent> {
                 detail.getOrder().getId(),
                 alarm.getDateOccurrence(),
                 detail.getTemperature(),
+                detail.getOrder().getProduct().getLimitTemperature(),
                 detail.getAccumulatedMass(),
                 detail.getDensity(),
                 detail.getCaudal()

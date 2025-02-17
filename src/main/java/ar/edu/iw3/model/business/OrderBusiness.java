@@ -419,8 +419,6 @@ public class OrderBusiness implements IOrderBusiness {
         loadDataWsWrapper.setTimestampLoad(currentTime);
         loadDataWsWrapper.setOrderId(order.getId());
         loadDataWsWrapper.setExternalId(order.getExternalId());
-        System.out.println("sexo8:");
-        System.out.println(loadDataWsWrapper.getExternalId());
         loadTruckWS.convertAndSend("/topic/loadTruck", loadDataWsWrapper);
         return order;
 
