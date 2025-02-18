@@ -14,13 +14,13 @@ public interface LoadDataRepository extends JpaRepository<LoadData, Long> {
 
     public Optional<List<LoadData>> findByOrderId(long id);
 
-    @Query("SELECT AVG(l.temperature) FROM LoadData l WHERE l.order.id = :orderId")
+    @Query("SELECT AVG(l.temperature) FROM LoadData l WHERE l.order.externalId = :orderId")
     Double avgTemperature(long orderId);
 
-    @Query("SELECT AVG(l.density) FROM LoadData l WHERE l.order.id = :orderId")
+    @Query("SELECT AVG(l.density) FROM LoadData l WHERE l.order.externalId = :orderId")
     Double avgDensity(long orderId);
 
-    @Query("SELECT AVG(l.caudal) FROM LoadData l WHERE l.order.id = :orderId")
+    @Query("SELECT AVG(l.caudal) FROM LoadData l WHERE l.order.externalId = :orderId")
     Double avgCaudal(long orderId);
 
     //List<LoadData> findByOrderId(long orderId);

@@ -19,6 +19,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 //    @Query(value = "SELECT * FROM Order WHERE Order.state = :state", nativeQuery = true)
 //    public List<Order> findByState(@Param("state") int state);
 
+    Page<Order> findAllByStateOrderByDateReceivedDesc(Order.State state, Pageable pageable);
+
+    Page<Order> findAllByOrderByDateReceivedDesc(Pageable pageable);
+
     public Optional<Order> findByPassword(Integer password);
 
     public Optional<Order> findByExternalId(String externalId) throws NotFoundException;

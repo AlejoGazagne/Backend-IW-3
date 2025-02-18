@@ -25,6 +25,7 @@ public class AlarmJsonSerializer extends StdSerializer<Alarm> {
         jsonGenerator.writeStringField("productName", alarm.getOrder().getProduct().getName());
         jsonGenerator.writeStringField("userName", alarm.getUser().getUsername());
         jsonGenerator.writeStringField("clientName", alarm.getOrder().getClient().getCompanyName());
+        jsonGenerator.writeStringField("orderEId", alarm.getOrder().getExternalId());
         jsonGenerator.writeEndObject();
     }
 }
