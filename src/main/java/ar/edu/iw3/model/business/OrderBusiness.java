@@ -71,6 +71,7 @@ public class OrderBusiness implements IOrderBusiness {
     @Override
     public Map<String, Object> getDetailsOrder(String id) throws NotFoundException, BusinessException {
         Map<String, Object> response = new HashMap<>();
+
         response.put("avgTemperature", loadDataBusiness.avgTemperature(Long.parseLong(id)));
         response.put("avgDensity", loadDataBusiness.avgDensity(Long.parseLong(id)));
         response.put("avgCaudal", loadDataBusiness.avgCaudal(Long.parseLong(id)));
@@ -516,9 +517,9 @@ public class OrderBusiness implements IOrderBusiness {
         try {
             Pageable pageable = PageRequest.of(currentPage, pageSize);
             if (state == null) {
-                return orderDAO.findAll(pageable);
+                return orderDAO.findAllByOrderByDateReceivedDesc(pageable);
             }
-            return orderDAO.findAllByState(state, pageable);
+            return orderDAO.findAllByStateOrderByDateReceivedDesc(state, pageable);
         } catch (Exception e){
             log.error(e.getMessage());
             throw BusinessException.builder().ex(e).build();
